@@ -1,0 +1,2836 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONFÍA · Tu lugar seguro</title>
+<script>
+  /* Aplica el tema guardado (o el del sistema) antes de pintar, para evitar parpadeos */
+  (function(){
+    try{
+      var guardado = localStorage.getItem('confia-tema');
+      var tema = guardado || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'noche' : 'dia');
+      document.documentElement.setAttribute('data-tema', tema);
+    }catch(e){
+      document.documentElement.setAttribute('data-tema', 'dia');
+    }
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root, [data-tema="dia"]{
+    --crema: #FAF7F0;
+    --crema-panel: #FFFFFF;
+    --crema-panel-glass: rgba(255, 255, 255, 0.88);
+    --guinda: #2B251F;
+    --guinda-fuerte: #191512;
+    --guinda-suave: #F3E9CD;
+    --dorado: #A9843E;
+    --dorado-hover: #937130;
+    --dorado-suave: #EFE4C3;
+    --dorado-glow: rgba(169, 132, 62, 0.25);
+    --negro: #24201A;
+    --texto-suave: #6C6252;
+    --texto-tenue: #968A78;
+    --linea: #E8DEBE;
+    --linea-suave: #F0E8CE;
+    --alerta: #942E20;
+    --alerta-suave: #F8E2D8;
+    --alerta-borde: #E7B0A0;
+    --sombra: rgba(42,38,32,0.12);
+    --sombra-suave: rgba(42,38,32,0.06);
+    --sombra-elevada: 0 20px 40px -10px rgba(42,38,32,0.16);
+    --estado-bien: #F4E5A8;
+    --estado-bien-texto: #4A3E1B;
+    --estado-neutral: #B09C72;
+    --estado-neutral-texto: #FFFFFF;
+    --estado-mal: #524B3E;
+    --estado-mal-texto: #FFFFFF;
+  }
+  [data-tema="noche"]{
+    --crema: #14120D;
+    --crema-panel: #1E1B15;
+    --crema-panel-glass: rgba(30, 27, 21, 0.88);
+    --guinda: #D9B76A;
+    --guinda-fuerte: #F0CF85;
+    --guinda-suave: #2D2618;
+    --dorado: #E2BF6E;
+    --dorado-hover: #F2D283;
+    --dorado-suave: #382F1B;
+    --dorado-glow: rgba(226, 191, 110, 0.28);
+    --negro: #F5EFE1;
+    --texto-suave: #BEB49B;
+    --texto-tenue: #8A816B;
+    --linea: #3A3424;
+    --linea-suave: #2E291C;
+    --alerta: #F06A5E;
+    --alerta-suave: #3C201C;
+    --alerta-borde: #682E26;
+    --sombra: rgba(0,0,0,0.5);
+    --sombra-suave: rgba(0,0,0,0.3);
+    --sombra-elevada: 0 22px 45px -10px rgba(0,0,0,0.65);
+    --estado-bien: #4D431D;
+    --estado-bien-texto: #F4E5A8;
+    --estado-neutral: #8C7855;
+    --estado-neutral-texto: #FFFFFF;
+    --estado-mal: #2E2A21;
+    --estado-mal-texto: #EBE4D2;
+  }
+
+  *, *::before, *::after{ box-sizing: border-box; }
+  html{
+    transition: background-color .3s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  body{
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    background:
+      radial-gradient(circle at 10% 15%, var(--dorado-suave) 0%, transparent 45%),
+      radial-gradient(circle at 90% 20%, var(--guinda-suave) 0%, transparent 40%),
+      radial-gradient(circle at 50% 90%, var(--dorado-suave) 0%, transparent 40%),
+      var(--crema);
+    color: var(--negro);
+    min-height: 100vh;
+    transition: background .3s ease, color .3s ease;
+  }
+
+  h1, h2, h3, h4, .marca-titulo, .eslogan, .eyebrow, .marca-chica{
+    font-family: 'Lora', Georgia, serif;
+  }
+
+  /* ---------- BOTÓN CAMBIO DE TEMA (Glassmorphic) ---------- */
+  .btn-tema-toggle{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 15px;
+    border-radius: 999px;
+    border: 1.5px solid var(--linea);
+    background: var(--crema-panel-glass);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: var(--negro);
+    font-family: 'Plus Jakarta Sans', inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px var(--sombra-suave);
+    transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .btn-tema-toggle:hover{
+    transform: translateY(-1px);
+    border-color: var(--dorado);
+    box-shadow: 0 4px 12px var(--sombra);
+  }
+  .btn-tema-toggle .icono-tema{ font-size: 15px; }
+
+  .acceso-header-flotante{
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 50;
+  }
+  @media (max-width: 480px){
+    .acceso-header-flotante{ top: 12px; right: 12px; }
+    .btn-tema-toggle{ padding: 6px 12px; font-size: 12px; }
+  }
+
+  /* ---------- ESTRELLAS DECORATIVAS ---------- */
+  .estrella{
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    opacity: 0.55;
+    pointer-events: none;
+    background: linear-gradient(150deg, var(--dorado) 0%, var(--guinda) 100%);
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    animation: flotar 7s ease-in-out infinite;
+    filter: drop-shadow(0 2px 4px var(--sombra-suave));
+  }
+  @keyframes flotar{
+    0%, 100%{ transform: translateY(0) rotate(-4deg); }
+    50%{ transform: translateY(-14px) rotate(6deg); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .estrella{ animation: none; }
+  }
+
+  /* ---------- PANTALLA DE ACCESO (LOGIN / REGISTRO) ---------- */
+  #pantalla-acceso{
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .escudo{
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, var(--guinda), var(--guinda-fuerte));
+    color: var(--crema-panel);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin-bottom: 16px;
+    box-shadow: 0 10px 25px var(--sombra), 0 0 0 4px var(--dorado-suave);
+    transition: transform .3s ease;
+  }
+  .escudo:hover{ transform: scale(1.05) rotate(5deg); }
+
+  h1.marca-titulo{
+    font-size: clamp(40px, 7vw, 56px);
+    margin: 0;
+    letter-spacing: 0.03em;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--guinda) 20%, var(--dorado) 90%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    line-height: 1.15;
+  }
+  .eslogan{
+    font-style: italic;
+    font-size: 17px;
+    color: var(--texto-suave);
+    margin: 8px 0 28px;
+    font-weight: 400;
+  }
+
+  .tarjeta-acceso{
+    position: relative;
+    background: var(--crema-panel-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--linea);
+    border-radius: 24px;
+    padding: 34px 28px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: var(--sombra-elevada);
+    text-align: left;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .tarjeta-acceso::before, .tarjeta-acceso::after{
+    content: "";
+    position: absolute;
+    background: linear-gradient(150deg, var(--dorado) 0%, var(--guinda) 100%);
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    filter: drop-shadow(0 3px 6px var(--sombra));
+  }
+  .tarjeta-acceso::before{
+    width: 26px; height: 26px;
+    top: -12px; left: -12px;
+    transform: rotate(-12deg);
+  }
+  .tarjeta-acceso::after{
+    width: 22px; height: 22px;
+    bottom: -10px; right: -10px;
+    transform: rotate(10deg);
+  }
+
+  /* Selector de tipo (Alumnos / Administrador) */
+  .cambio-modo{
+    display: flex;
+    border-radius: 999px;
+    background: var(--crema);
+    border: 1px solid var(--linea);
+    padding: 4px;
+    margin-bottom: 22px;
+    gap: 4px;
+  }
+  .cambio-modo button{
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-family: 'Plus Jakarta Sans', inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--texto-suave);
+    transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .cambio-modo button:hover{ color: var(--negro); }
+  .cambio-modo button.activo{
+    background: var(--guinda);
+    color: var(--crema-panel);
+    box-shadow: 0 4px 12px var(--sombra);
+  }
+
+  /* ---------- FORMULARIOS & UNIVERSAL INPUTS (100% RESPONSIVE) ---------- */
+  label{
+    display: block;
+    text-align: left;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--negro);
+    margin: 16px 0 6px;
+  }
+  label:first-of-type{ margin-top: 4px; }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  input[type="number"],
+  select,
+  textarea{
+    display: block;
+    width: 100% !important;
+    font-family: 'Plus Jakarta Sans', inherit;
+    font-size: 14.5px;
+    font-weight: 500;
+    padding: 12px 15px;
+    border-radius: 12px;
+    border: 1.5px solid var(--linea);
+    background: var(--crema-panel);
+    color: var(--negro);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+    transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  input::placeholder, textarea::placeholder{
+    color: var(--texto-tenue);
+    font-weight: 400;
+  }
+  input:focus, select:focus, textarea:focus{
+    outline: none;
+    border-color: var(--dorado);
+    box-shadow: 0 0 0 3.5px var(--dorado-glow);
+    background: var(--crema-panel);
+  }
+
+  /* Fix autofill background in WebKit */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover, 
+  input:-webkit-autofill:focus{
+    -webkit-text-fill-color: var(--negro);
+    -webkit-box-shadow: 0 0 0px 1000px var(--crema-panel) inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  textarea{ min-height: 110px; resize: vertical; line-height: 1.5; }
+
+  .campo-registro{ display: none; }
+  .campo-registro.visible{ display: block; }
+
+  .campo-clave-wrap{
+    position: relative;
+    width: 100%;
+  }
+  .campo-clave-wrap input{
+    padding-right: 48px !important;
+  }
+  .btn-ver-clave{
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 6px 8px;
+    line-height: 1;
+    color: var(--texto-suave);
+    border-radius: 8px;
+    transition: color .15s ease, background .15s ease;
+  }
+  .btn-ver-clave:hover{
+    color: var(--guinda);
+    background: var(--guinda-suave);
+  }
+
+  .enlace-recuperar{
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    background: none;
+    border: none;
+    color: var(--dorado);
+    cursor: pointer;
+    padding: 0;
+    font-family: 'Plus Jakarta Sans', inherit;
+    transition: color .15s ease;
+  }
+  .enlace-recuperar:hover{
+    color: var(--guinda);
+    text-decoration: underline;
+  }
+
+  /* Botón Principal */
+  .boton{
+    margin-top: 22px;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: 'Plus Jakarta Sans', inherit;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 13px 22px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    color: var(--crema-panel);
+    background: linear-gradient(135deg, var(--guinda), var(--guinda-fuerte));
+    box-shadow: 0 8px 18px var(--sombra);
+    transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .boton:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px var(--sombra);
+    filter: brightness(1.08);
+  }
+  .boton:active{ transform: translateY(0); }
+  .boton:disabled{
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .aviso-acceso{
+    display: none;
+    margin-top: 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--alerta);
+    background: var(--alerta-suave);
+    border: 1px solid var(--alerta-borde);
+    padding: 10px 14px;
+    border-radius: 10px;
+  }
+  .aviso-acceso.visible{ display: block; }
+  .nota-firebase{
+    font-size: 12px;
+    color: var(--texto-suave);
+    margin-top: 18px;
+    text-align: center;
+  }
+
+  /* ---------- APP PRINCIPAL ---------- */
+  #app, #app-admin{ display: none; min-height: 100vh; }
+  #app.visible, #app-admin.visible{ display: block; }
+  #app-admin section{ display: none; }
+  #app-admin section.activa-admin{ display: block; animation: aparecer .3s ease; }
+
+  /* Barra Superior */
+  .barra-superior{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    background: var(--crema-panel-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1.5px solid var(--dorado-suave);
+    position: relative;
+    z-index: 20;
+    gap: 16px;
+  }
+  .barra-superior .marca-chica{
+    color: var(--guinda);
+    font-weight: 700;
+    font-size: 21px;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .usuario-info-wrap{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .usuario-badge{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--crema);
+    border: 1px solid var(--linea);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--negro);
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+  }
+  #saludo-usuario, #saludo-admin{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .boton-salir{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--crema-panel);
+    border: 1.5px solid var(--linea);
+    color: var(--negro);
+    font-family: 'Plus Jakarta Sans', inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 15px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px var(--sombra-suave);
+    transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+  }
+  .boton-salir:hover{
+    background: var(--alerta-suave);
+    color: var(--alerta);
+    border-color: var(--alerta-borde);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--sombra);
+  }
+
+  @media (max-width: 768px){
+    .barra-superior{ padding: 12px 16px; }
+    .usuario-badge{ max-width: 180px; }
+  }
+  @media (max-width: 580px){
+    .barra-superior{
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+    }
+    .usuario-info-wrap{
+      width: 100%;
+      justify-content: center;
+      gap: 8px;
+    }
+    .usuario-badge{
+      max-width: 100%;
+      order: -1;
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  /* Navegación con Glassmorphism */
+  nav{
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    background: var(--crema-panel-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--linea);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 16px var(--sombra-suave);
+  }
+  nav button{
+    font-family: 'Plus Jakarta Sans', inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--linea);
+    background: transparent;
+    color: var(--negro);
+    cursor: pointer;
+    transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  nav button:hover{
+    background: var(--guinda-suave);
+    transform: translateY(-1px);
+  }
+  nav button.activo{
+    background: var(--guinda);
+    border-color: var(--guinda);
+    color: var(--crema-panel);
+    box-shadow: 0 4px 12px var(--sombra);
+  }
+
+  main{
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 36px 20px 100px;
+    position: relative;
+  }
+  section{ display: none; }
+  section.activa{ display: block; animation: aparecer .3s ease; }
+  @keyframes aparecer{
+    from{ opacity: 0; transform: translateY(8px); }
+    to{ opacity: 1; transform: translateY(0); }
+  }
+
+  h2{
+    font-size: 28px;
+    margin: 0 0 6px;
+    color: var(--guinda);
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .eyebrow{
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dorado);
+    font-weight: 700;
+    margin: 0 0 6px;
+  }
+  p.parrafo{
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: var(--texto-suave);
+    margin: 6px 0 16px;
+  }
+
+  .tarjeta{
+    background: var(--crema-panel);
+    border: 1px solid var(--linea);
+    border-radius: 20px;
+    padding: 28px;
+    margin-top: 18px;
+    box-shadow: 0 10px 28px var(--sombra-suave);
+  }
+
+  /* Chips de Emociones & Factores */
+  .emociones, .factores{
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .emocion-chip, .factor-chip{
+    font-family: 'Plus Jakarta Sans', inherit;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 9px 16px;
+    border-radius: 999px;
+    border: 1.5px solid var(--linea);
+    background: var(--crema-panel);
+    color: var(--negro);
+    cursor: pointer;
+    user-select: none;
+    transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .emocion-chip:hover, .factor-chip:hover{
+    transform: translateY(-2px);
+    border-color: var(--dorado);
+  }
+  .emocion-chip.seleccionada{
+    background: var(--guinda);
+    border-color: var(--guinda);
+    color: var(--crema-panel);
+    box-shadow: 0 4px 14px var(--sombra);
+  }
+  .factor-chip.seleccionada{
+    background: var(--dorado);
+    border-color: var(--dorado);
+    color: #FFFFFF;
+    box-shadow: 0 4px 14px var(--dorado-glow);
+  }
+
+  /* Slider de Intensidad Emocional */
+  .intensidad{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 8px;
+  }
+  .intensidad input[type="range"]{
+    flex: 1;
+    accent-color: var(--guinda);
+    cursor: pointer;
+    height: 8px;
+  }
+  #valor-intensidad{
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--guinda);
+    background: var(--guinda-suave);
+    padding: 4px 12px;
+    border-radius: 999px;
+    min-width: 32px;
+    text-align: center;
+  }
+
+  /* ---------- CHAT IA CON ASISTENTE PSICOLOGÍA ---------- */
+  .aviso-chat{
+    background: var(--guinda-suave);
+    color: var(--guinda);
+    border: 1px solid var(--linea);
+    border-radius: 14px;
+    padding: 14px 18px;
+    font-size: 13.5px;
+    margin-bottom: 16px;
+    line-height: 1.55;
+  }
+  .cabecera-chat{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+    gap: 8px;
+  }
+  .icono-btn{
+    background: var(--crema);
+    border: 1.5px solid var(--linea);
+    border-radius: 999px;
+    width: 42px;
+    height: 42px;
+    font-size: 17px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all .2s ease;
+  }
+  .icono-btn:hover{ transform: scale(1.05); border-color: var(--dorado); }
+  .icono-btn.activo{
+    background: var(--guinda);
+    color: var(--crema-panel);
+    border-color: var(--guinda);
+  }
+  .ventana-chat{
+    height: 380px;
+    overflow-y: auto;
+    border: 1.5px solid var(--linea);
+    border-radius: 18px;
+    padding: 18px;
+    background: var(--crema-panel);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.03);
+  }
+  .msg{
+    max-width: 82%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 14.5px;
+    line-height: 1.5;
+    position: relative;
+    word-break: break-word;
+  }
+  .msg.ia{
+    background: var(--guinda-suave);
+    color: var(--negro);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 8px var(--sombra-suave);
+  }
+  .msg.ia.cargando{
+    font-style: italic;
+    color: var(--texto-suave);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .msg.usuario{
+    background: linear-gradient(135deg, var(--guinda), var(--guinda-fuerte));
+    color: var(--crema-panel);
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 4px 12px var(--sombra);
+  }
+  .msg.alerta-riesgo{
+    background: var(--alerta-suave);
+    color: var(--alerta);
+    align-self: flex-start;
+    border: 1.5px solid var(--alerta-borde);
+    font-weight: 600;
+  }
+
+  /* Sugerencias Rápidas de Chat (Quick Prompts) */
+  .chat-sugerencias{
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 10px 2px;
+    margin-top: 4px;
+  }
+  .chip-sugerencia{
+    flex-shrink: 0;
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 6px 13px;
+    border-radius: 999px;
+    border: 1px solid var(--linea);
+    background: var(--crema-panel);
+    color: var(--texto-suave);
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .chip-sugerencia:hover{
+    background: var(--guinda-suave);
+    color: var(--guinda);
+    border-color: var(--dorado);
+    transform: translateY(-1px);
+  }
+
+  .fila-chat{
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+    align-items: center;
+  }
+  .fila-chat input{ flex: 1; }
+  .fila-chat button:not(.icono-btn){
+    background: linear-gradient(135deg, var(--guinda), var(--guinda-fuerte));
+    color: var(--crema-panel);
+    border: none;
+    border-radius: 12px;
+    padding: 0 24px;
+    height: 48px;
+    font-family: 'Plus Jakarta Sans', inherit;
+    font-weight: 700;
+    font-size: 14.5px;
+    cursor: pointer;
+    box-shadow: 0 6px 16px var(--sombra);
+    transition: all .2s ease;
+  }
+  .fila-chat button:not(.icono-btn):hover{
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px var(--sombra);
+  }
+
+  /* ---------- PANEL ADMIN: KPI CARDS & SECCIONES ---------- */
+  .admin-kpis-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .kpi-card{
+    background: var(--crema-panel);
+    border: 1px solid var(--linea);
+    border-radius: 16px;
+    padding: 18px 16px;
+    text-align: left;
+    box-shadow: 0 8px 20px var(--sombra-suave);
+  }
+  .kpi-card .kpi-icono{ font-size: 24px; margin-bottom: 6px; display: block; }
+  .kpi-card .kpi-num{ font-size: 26px; font-weight: 700; color: var(--guinda); line-height: 1.1; }
+  .kpi-card .kpi-label{ font-size: 12.5px; color: var(--texto-suave); font-weight: 500; margin-top: 4px; }
+
+  .fila-admin{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--linea);
+    font-size: 14px;
+  }
+  .fila-admin:last-child{ border-bottom: none; }
+  .fila-admin .valor-barra{
+    flex: 1;
+    margin: 0 14px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--linea);
+    overflow: hidden;
+  }
+  .fila-admin .valor-barra span{
+    display: block;
+    height: 100%;
+    background: linear-gradient(120deg, var(--guinda), var(--dorado));
+    border-radius: 999px;
+  }
+
+  .tarjeta-denuncia, .tarjeta-alerta{
+    background: var(--crema-panel);
+    border: 1.5px solid var(--linea);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-top: 14px;
+    box-shadow: 0 8px 22px var(--sombra-suave);
+  }
+  .tarjeta-alerta{
+    border-color: var(--alerta-borde);
+    background: var(--alerta-suave);
+  }
+  .tarjeta-denuncia .meta-denuncia, .tarjeta-alerta .meta-alerta{
+    font-size: 12px;
+    color: var(--texto-suave);
+    margin-bottom: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .tarjeta-alerta .meta-alerta{ color: var(--alerta); }
+
+  .tarjeta-anuncio{
+    background: var(--crema-panel);
+    border: 1.5px solid var(--dorado-suave);
+    border-left: 5px solid var(--dorado);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-top: 14px;
+    box-shadow: 0 8px 22px var(--sombra-suave);
+  }
+  .tarjeta-anuncio .meta-anuncio{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    font-size: 12.5px;
+    color: var(--texto-suave);
+    margin-bottom: 8px;
+  }
+  .tarjeta-anuncio h4{ margin: 0 0 6px; color: var(--guinda); font-size: 17px; }
+  .tarjeta-anuncio .etiqueta-grado-anuncio{
+    background: var(--dorado-suave);
+    color: var(--dorado);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .btn-borrar-anuncio{
+    background: none;
+    border: none;
+    color: var(--alerta);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: underline;
+    padding: 0;
+  }
+
+  /* ---------- TOAST NOTIFICATIONS (FLOTANTES) ---------- */
+  #toast-contenedor{
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+  }
+  .toast{
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--crema-panel-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--linea);
+    border-radius: 14px;
+    padding: 12px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--negro);
+    box-shadow: 0 14px 34px var(--sombra);
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .toast.visible{
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .toast-exito{ border-color: var(--dorado); }
+  .toast-alerta{ border-color: var(--alerta); color: var(--alerta); }
+
+  /* ---------- AGENDA / CALENDARIO ---------- */
+  .calendario-cabecera{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .calendario-cabecera strong{
+    text-transform: capitalize;
+    color: var(--guinda);
+    font-size: 17px;
+  }
+  .calendario-grid{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    text-align: center;
+  }
+  .dia-semana{
+    font-size: 11.5px;
+    color: var(--texto-suave);
+    font-weight: 700;
+    padding-bottom: 6px;
+  }
+  .dia-celda{
+    position: relative;
+    padding: 12px 4px;
+    border-radius: 12px;
+    border: 1px solid var(--linea);
+    background: var(--crema-panel);
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: all .15s ease;
+  }
+  .dia-celda:hover{
+    background: var(--guinda-suave);
+    border-color: var(--dorado);
+  }
+  .dia-celda.vacio{ border: none; background: transparent; cursor: default; }
+  .dia-celda.hoy{ border-color: var(--dorado); font-weight: 700; }
+  .dia-celda.seleccionado{
+    background: var(--guinda);
+    color: var(--crema-panel);
+    border-color: var(--guinda);
+    box-shadow: 0 4px 12px var(--sombra);
+  }
+  .dia-celda .punto{
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--dorado);
+  }
+  .form-evento{ display: flex; gap: 10px; margin-top: 16px; }
+  .form-evento input{ flex: 1; }
+  .lista-eventos{ list-style: none; padding: 0; margin: 16px 0 0; }
+  .lista-eventos li{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 16px;
+    border-radius: 12px;
+    background: var(--crema);
+    border: 1px solid var(--linea);
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  .lista-eventos button{
+    background: none;
+    border: none;
+    color: var(--alerta);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: underline;
+  }
+  .sin-eventos{ color: var(--texto-suave); font-size: 14px; margin-top: 14px; }
+
+  footer{
+    text-align: center;
+    padding: 24px;
+    font-size: 12.5px;
+    color: var(--texto-suave);
+  }
+
+  @media (max-width: 600px){
+    main{ padding: 24px 14px 90px; }
+    .tarjeta{ padding: 20px 16px; border-radius: 16px; }
+    .tarjeta-acceso{ padding: 28px 20px; border-radius: 20px; }
+    nav button{ font-size: 12.5px; padding: 7px 12px; }
+    .msg{ max-width: 90%; }
+    .estrella{ display: none; }
+    #toast-contenedor{ bottom: 16px; right: 16px; left: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ PANTALLA DE ACCESO ============ -->
+<div id="pantalla-acceso">
+  <div class="acceso-header-flotante">
+    <button class="btn-tema-toggle" type="button" aria-label="Cambiar entre modo día y modo noche">
+      <span class="icono-tema">☀️</span><span class="texto-tema">Modo día</span>
+    </button>
+  </div>
+  <span class="estrella" style="top:8%; left:10%;"></span>
+  <span class="estrella" style="top:16%; right:12%; animation-delay:1.2s; width:16px; height:16px;"></span>
+  <span class="estrella" style="bottom:14%; left:16%; animation-delay:2.4s;"></span>
+  <span class="estrella" style="bottom:10%; right:10%; animation-delay:0.6s; width:16px; height:16px;"></span>
+  <span class="estrella" style="top:44%; left:4%; animation-delay:1.8s; width:13px; height:13px;"></span>
+  <span class="estrella" style="top:40%; right:5%; animation-delay:3s; width:13px; height:13px;"></span>
+
+  <div class="escudo">🛡️</div>
+  <h1 class="marca-titulo">CONFÍA</h1>
+  <p class="eslogan">Tu lugar seguro para florecer y ser escuchado.</p>
+
+  <div class="cambio-modo" id="cambio-acceso-tipo" style="max-width:360px; margin: 0 auto 14px;">
+    <button id="tab-alumno" class="activo" type="button">🎓 Alumnos</button>
+    <button id="tab-admin" type="button">🗝️ Administrador</button>
+  </div>
+
+  <div class="tarjeta-acceso" id="tarjeta-acceso-alumno">
+    <div class="cambio-modo">
+      <button id="tab-login" class="activo">Iniciar sesión</button>
+      <button id="tab-registro">Registrarse</button>
+    </div>
+
+    <form id="form-acceso">
+      <label for="campo-usuario">Correo electrónico</label>
+      <input type="email" id="campo-usuario" autocomplete="email" required>
+
+      <div class="campo-registro" id="campo-grado">
+        <label for="campo-grado-select">Grado</label>
+        <select id="campo-grado-select">
+          <optgroup label="Primaria">
+            <option>1.° de primaria</option>
+            <option>2.° de primaria</option>
+            <option>3.° de primaria</option>
+            <option>4.° de primaria</option>
+            <option>5.° de primaria</option>
+            <option>6.° de primaria</option>
+          </optgroup>
+          <optgroup label="Secundaria">
+            <option>1.° de secundaria</option>
+            <option>2.° de secundaria</option>
+            <option>3.° de secundaria</option>
+            <option>4.° de secundaria</option>
+            <option>5.° de secundaria</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <label for="campo-clave">Contraseña</label>
+      <div class="campo-clave-wrap">
+        <input type="password" id="campo-clave" autocomplete="current-password" required>
+        <button type="button" class="btn-ver-clave" data-objetivo="campo-clave" aria-label="Mostrar contraseña">👁️</button>
+      </div>
+
+      <div class="campo-registro" id="campo-clave-confirmar-contenedor">
+        <label for="campo-clave-confirmar">Confirmar contraseña</label>
+        <div class="campo-clave-wrap">
+          <input type="password" id="campo-clave-confirmar">
+          <button type="button" class="btn-ver-clave" data-objetivo="campo-clave-confirmar" aria-label="Mostrar contraseña">👁️</button>
+        </div>
+      </div>
+
+      <button type="button" class="enlace-recuperar" id="btn-recuperar-clave">¿Olvidaste tu contraseña?</button>
+
+      <button type="submit" class="boton" id="btn-acceso">Iniciar sesión</button>
+      <div class="aviso-acceso" id="aviso-acceso"></div>
+    </form>
+    <p class="nota-firebase">Conectado a Firebase Authentication.</p>
+  </div>
+
+  <!-- ============ ACCESO DE ADMINISTRADOR (separado del de alumnos) ============ -->
+  <div class="tarjeta-acceso" id="tarjeta-acceso-admin" style="display:none;">
+    <div class="cambio-modo">
+      <button id="tab-admin-login" class="activo" type="button">Iniciar sesión</button>
+      <button id="tab-admin-registro" type="button">Crear cuenta</button>
+    </div>
+
+    <form id="form-acceso-admin">
+      <label for="campo-usuario-admin">Correo electrónico</label>
+      <input type="email" id="campo-usuario-admin" autocomplete="email" required>
+
+      <label for="campo-clave-admin">Contraseña</label>
+      <div class="campo-clave-wrap">
+        <input type="password" id="campo-clave-admin" autocomplete="current-password" required>
+        <button type="button" class="btn-ver-clave" data-objetivo="campo-clave-admin" aria-label="Mostrar contraseña">👁️</button>
+      </div>
+
+      <div class="campo-registro" id="campo-codigo-admin-contenedor">
+        <label for="campo-codigo-admin">Código de administrador del colegio</label>
+        <div class="campo-clave-wrap">
+          <input type="password" id="campo-codigo-admin" placeholder="Código entregado por el colegio">
+          <button type="button" class="btn-ver-clave" data-objetivo="campo-codigo-admin" aria-label="Mostrar código">👁️</button>
+        </div>
+      </div>
+
+      <button type="button" class="enlace-recuperar" id="btn-recuperar-clave-admin">¿Olvidaste tu contraseña?</button>
+
+      <button type="submit" class="boton" id="btn-acceso-admin">Iniciar sesión</button>
+      <div class="aviso-acceso" id="aviso-acceso-admin"></div>
+    </form>
+    <p class="nota-firebase">Solo el personal autorizado del colegio puede crear una cuenta de administrador, mediante el código entregado por el colegio.</p>
+  </div>
+</div>
+
+<!-- ============ APP PRINCIPAL ============ -->
+<div id="app">
+
+  <div class="barra-superior">
+    <div class="marca-chica">✦ CONFÍA</div>
+    <div class="usuario-info-wrap">
+      <button class="btn-tema-toggle" type="button" aria-label="Cambiar entre modo día y modo noche">
+        <span class="icono-tema">☀️</span><span class="texto-tema">Modo día</span>
+      </button>
+      <div class="usuario-badge">
+        <span>👤</span><span id="saludo-usuario"></span>
+      </div>
+      <button class="boton-salir" id="btn-salir" type="button" aria-label="Cerrar sesión">
+        <span>🚪</span> <span>Cerrar sesión</span>
+      </button>
+    </div>
+  </div>
+
+  <nav>
+    <button class="tab activo" data-seccion="inicio">🏠 Inicio</button>
+    <button class="tab" data-seccion="anuncios">📢 Anuncios</button>
+    <button class="tab" data-seccion="chat-psicologia">🧠 IA de Psicología</button>
+    <button class="tab" data-seccion="registro">😊 Registro Emocional</button>
+    <button class="tab" data-seccion="agenda">🗓️ Agenda</button>
+    <button class="tab" data-seccion="denuncia">🛡️ Denuncia Anónima</button>
+    <button class="tab" data-seccion="info">📚 Información</button>
+  </nav>
+
+  <main>
+
+    <!-- INICIO: PANTALLA DE OPCIONES (más didáctica) -->
+    <section id="inicio" class="activa">
+      <div class="eyebrow">Bienvenido/a</div>
+      <h2>✦ ¿Qué necesitas hoy?</h2>
+      <p class="parrafo">Elige una opción para empezar. Puedes cambiar entre ellas cuando quieras desde la barra de arriba.</p>
+
+      <!-- ESTADO DE ÁNIMO -->
+      <div class="bloque-estado">
+        <div class="eyebrow">Antes de empezar</div>
+        <h3 class="titulo-bloque">¿Cómo te sientes ahora?</h3>
+        <div class="estado-grid">
+          <button type="button" class="estado-card estado-bien" data-estado="bien" data-paquete="descanso">
+            <span class="estado-icono">✦</span>
+            <span class="estado-nombre">Me siento bien</span>
+          </button>
+          <button type="button" class="estado-card estado-neutral" data-estado="neutral" data-paquete="calma">
+            <span class="estado-icono">✦</span>
+            <span class="estado-nombre">Me siento neutral</span>
+          </button>
+          <button type="button" class="estado-card estado-mal" data-estado="mal" data-paquete="acompanamiento">
+            <span class="estado-icono">✦</span>
+            <span class="estado-nombre">Me siento mal</span>
+          </button>
+        </div>
+        <p class="sugerencia-estado" id="sugerencia-estado"></p>
+      </div>
+
+      <!-- PAQUETES DE APOYO -->
+      <div class="bloque-paquetes">
+        <div class="eyebrow">Herramientas para ti</div>
+        <h3 class="titulo-bloque">Paquetes de apoyo</h3>
+        <div class="paquetes-grid">
+
+          <div class="paquete-card" id="paquete-calma" data-paquete="calma">
+            <div class="paquete-cabecera">
+              <span class="paquete-icono">✦</span>
+              <div>
+                <h4>Paquete de Calma</h4>
+                <p>Para bajar la ansiedad y encontrar tranquilidad en el momento.</p>
+              </div>
+              <span class="paquete-flecha">▾</span>
+            </div>
+            <ul class="paquete-lista">
+              <li>Respira contando 4 segundos al inhalar, sostén 7 y exhala en 8. Repite 4 veces.</li>
+              <li>Técnica 5-4-3-2-1: nombra 5 cosas que ves, 4 que puedes tocar, 3 que oyes, 2 que hueles y 1 que saboreas.</li>
+              <li>Busca un lugar tranquilo y baja el ritmo unos minutos antes de seguir con tu día.</li>
+              <li class="paquete-accion"><button type="button" class="paquete-boton" data-ir="chat-psicologia">Hablar con la IA de Psicología</button></li>
+            </ul>
+          </div>
+
+          <div class="paquete-card" id="paquete-acompanamiento" data-paquete="acompanamiento">
+            <div class="paquete-cabecera">
+              <span class="paquete-icono">✦</span>
+              <div>
+                <h4>Paquete de Acompañamiento</h4>
+                <p>Para cuando sientes que no quieres estar solo/a con lo que te pasa.</p>
+              </div>
+              <span class="paquete-flecha">▾</span>
+            </div>
+            <ul class="paquete-lista">
+              <li>Cuéntale a la IA de Psicología cómo te sientes, con calma y sin apuros.</li>
+              <li>Piensa en un adulto de confianza (familiar, docente, tutor) a quien puedas contárselo también.</li>
+              <li>Si algo o alguien te está haciendo daño, usa la Denuncia Anónima: nadie sabrá que fuiste tú.</li>
+              <li class="paquete-accion"><button type="button" class="paquete-boton" data-ir="chat-psicologia">Hablar ahora</button></li>
+              <li class="paquete-accion"><button type="button" class="paquete-boton" data-ir="denuncia">Ir a Denuncia Anónima</button></li>
+            </ul>
+          </div>
+
+          <div class="paquete-card" id="paquete-descanso" data-paquete="descanso">
+            <div class="paquete-cabecera">
+              <span class="paquete-icono">✦</span>
+              <div>
+                <h4>Paquete Descanso</h4>
+                <p>Para soltar el día y cuidar tu energía.</p>
+              </div>
+              <span class="paquete-flecha">▾</span>
+            </div>
+            <ul class="paquete-lista">
+              <li>Relajación muscular: tensa y suelta cada grupo de músculos, de los pies a la cabeza, unos segundos cada uno.</li>
+              <li>Aparta un momento sin pantallas antes de dormir.</li>
+              <li>Anota cómo estuvo tu día en el Registro Emocional.</li>
+              <li class="paquete-accion"><button type="button" class="paquete-boton" data-ir="registro">Ir al Registro Emocional</button></li>
+              <li class="paquete-accion"><button type="button" class="paquete-boton" data-ir="agenda">Agendar un descanso</button></li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- CHAT · IA DE PSICOLOGÍA -->
+    <section id="chat-psicologia">
+      <div class="eyebrow">Soporte emocional</div>
+      <h2>🧠 IA de Psicología</h2>
+      <div class="aviso-chat">
+        Soy una inteligencia artificial de apoyo emocional, no un profesional de la salud mental.
+        Si estás en peligro o necesitas ayuda urgente, habla con un adulto de confianza, un docente
+        o un familiar lo antes posible.
+      </div>
+      <div class="cabecera-chat">
+        <button class="icono-btn" id="btn-audio-psicologia" title="Leer respuestas en voz alta">🔈</button>
+      </div>
+      <div id="ventana-chat-psicologia" class="ventana-chat"></div>
+
+      <div class="chat-sugerencias">
+        <button type="button" class="chip-sugerencia" data-texto="Me siento con mucha ansiedad por los exámenes">🌿 Ansiedad por exámenes</button>
+        <button type="button" class="chip-sugerencia" data-texto="Tuve un problema con un compañero y no sé cómo resolverlo">💬 Problema con amigos</button>
+        <button type="button" class="chip-sugerencia" data-texto="¿Puedes guiarme en un ejercicio de respiración para calmarme?">🧘 Ejercicio de respiración</button>
+        <button type="button" class="chip-sugerencia" data-texto="Me siento solo y triste hoy en el colegio">🥺 Me siento solo/a</button>
+      </div>
+
+      <div class="fila-chat">
+        <input type="text" id="entrada-chat-psicologia" placeholder="Escribe cómo te sientes o elige un tema arriba...">
+        <button class="icono-btn" id="btn-mic-psicologia" title="Hablar en vez de escribir">🎤</button>
+        <button id="btn-enviar-chat-psicologia">Enviar</button>
+      </div>
+    </section>
+
+    <!-- REGISTRO EMOCIONAL -->
+    <section id="registro">
+      <div class="eyebrow">Bienestar</div>
+      <h2>😊 Registro Emocional</h2>
+      <p class="parrafo">Cuéntanos cómo va tu día. Entre más nos cuentes, mejor podemos acompañarte.</p>
+      <div class="tarjeta">
+        <label>¿Cómo te sientes hoy?</label>
+        <div class="emociones" id="emociones">
+          <div class="emocion-chip" data-valor="😀 Feliz">😀 Feliz</div>
+          <div class="emocion-chip" data-valor="😐 Neutral">😐 Neutral</div>
+          <div class="emocion-chip" data-valor="😢 Triste">😢 Triste</div>
+          <div class="emocion-chip" data-valor="😠 Enojado">😠 Enojado</div>
+          <div class="emocion-chip" data-valor="😰 Ansioso">😰 Ansioso</div>
+          <div class="emocion-chip" data-valor="😴 Cansado">😴 Cansado</div>
+          <div class="emocion-chip" data-valor="🥺 Solo/a">🥺 Solo/a</div>
+          <div class="emocion-chip" data-valor="🤩 Emocionado">🤩 Emocionado</div>
+        </div>
+
+        <label>¿Qué tan fuerte sientes esa emoción? (1 = Leve, 5 = Muy intensa)</label>
+        <div class="intensidad">
+          <input type="range" id="intensidad-emocion" min="1" max="5" value="3">
+          <span id="valor-intensidad">3</span>
+        </div>
+
+        <label>¿Qué influyó en cómo te sientes? (elige una o varias)</label>
+        <div class="factores" id="factores">
+          <div class="factor-chip" data-valor="Familia">👪 Familia</div>
+          <div class="factor-chip" data-valor="Amigos">🧑‍🤝‍🧑 Amigos</div>
+          <div class="factor-chip" data-valor="Colegio">🏫 Colegio</div>
+          <div class="factor-chip" data-valor="Redes sociales">📱 Redes sociales</div>
+          <div class="factor-chip" data-valor="Salud">💪 Salud</div>
+          <div class="factor-chip" data-valor="Otro">✨ Otro</div>
+        </div>
+
+        <label for="comentario-registro">Cuéntanos cómo te sientes</label>
+        <textarea id="comentario-registro" placeholder="Escribe aquí tus pensamientos (opcional)"></textarea>
+
+        <button class="boton" id="btn-registro">Guardar en mi diario</button>
+        <div class="confirmacion registro" id="confirmacion-registro">Registro guardado correctamente. 🌱</div>
+      </div>
+    </section>
+
+    <!-- AGENDA -->
+    <section id="agenda">
+      <div class="eyebrow">Organización</div>
+      <h2>🗓️ Agenda</h2>
+      <p class="parrafo">Guarda tus actividades, citas y recordatorios. Tus eventos quedan guardados aunque cierres sesión o recargues la página.</p>
+      <div class="tarjeta">
+        <div class="calendario-cabecera">
+          <button class="icono-btn" id="mes-anterior" title="Mes anterior">‹</button>
+          <strong id="calendario-mes-label"></strong>
+          <button class="icono-btn" id="mes-siguiente" title="Mes siguiente">›</button>
+        </div>
+        <div class="calendario-grid" id="calendario-grid"></div>
+
+        <form class="form-evento" id="form-evento">
+          <input type="text" id="titulo-evento" placeholder="Añadir evento para el día seleccionado...">
+          <button type="submit" class="icono-btn" title="Agregar evento">➕</button>
+        </form>
+
+        <ul class="lista-eventos" id="lista-eventos"></ul>
+        <p class="sin-eventos" id="sin-eventos" style="display:none;">No hay eventos guardados para este día.</p>
+      </div>
+    </section>
+
+    <!-- DENUNCIA ANÓNIMA -->
+    <section id="denuncia">
+      <div class="eyebrow">Espacio seguro</div>
+      <h2>🛡️ Denuncia Anónima</h2>
+      <p class="parrafo">Tu identidad no se registra en ningún momento. Describe lo sucedido con la mayor claridad posible.</p>
+      <div class="tarjeta">
+        <label for="grado-denuncia">Grado de la persona afectada</label>
+        <select id="grado-denuncia">
+          <optgroup label="Primaria">
+            <option>1.° de primaria</option>
+            <option>2.° de primaria</option>
+            <option>3.° de primaria</option>
+            <option>4.° de primaria</option>
+            <option>5.° de primaria</option>
+            <option>6.° de primaria</option>
+          </optgroup>
+          <optgroup label="Secundaria">
+            <option>1.° de secundaria</option>
+            <option>2.° de secundaria</option>
+            <option>3.° de secundaria</option>
+            <option>4.° de secundaria</option>
+            <option>5.° de secundaria</option>
+          </optgroup>
+          <option>Prefiero no decirlo</option>
+        </select>
+
+        <label for="tipo-denuncia">Tipo de situación</label>
+        <select id="tipo-denuncia">
+          <option>Bullying</option>
+          <option>Violencia física</option>
+          <option>Violencia psicológica</option>
+          <option>Discriminación</option>
+          <option>Ciberacoso</option>
+          <option>Acoso sexual</option>
+          <option>Negligencia o abandono</option>
+          <option>Consumo de sustancias</option>
+          <option>Otro</option>
+        </select>
+
+        <label for="descripcion-denuncia">Describe lo sucedido</label>
+        <textarea id="descripcion-denuncia" placeholder="Escribe aquí lo que pasó con el mayor detalle posible..."></textarea>
+
+        <button class="boton" id="btn-denuncia">Enviar Denuncia Segura</button>
+        <div class="confirmacion denuncia" id="confirmacion-denuncia">Denuncia enviada de forma anónima.</div>
+      </div>
+    </section>
+
+    <!-- INFORMACIÓN -->
+    <section id="anuncios">
+      <div class="eyebrow">Comunicados del colegio</div>
+      <h2>📢 Anuncios</h2>
+      <p class="parrafo">Aquí verás los comunicados generales que publique el equipo de administración. Se muestran los más recientes primero.</p>
+      <div id="contenedor-anuncios-alumno">
+        <p class="sin-eventos">Todavía no hay anuncios publicados.</p>
+      </div>
+    </section>
+
+    <section id="info">
+      <div class="eyebrow">El proyecto</div>
+      <h2>📚 Sobre CONFÍA</h2>
+      <p class="parrafo">
+        <strong>Objetivo:</strong> brindar apoyo emocional y educativo, registrar el estado emocional de los
+        estudiantes, ayudarlos a organizarse y facilitar denuncias anónimas dentro del colegio.
+      </p>
+      <p class="parrafo"><strong>Beneficios:</strong></p>
+      <ul class="lista-beneficios">
+        <li>🧠 IA de Psicología para hablar de cómo te sientes y recibir consejos.</li>
+        <li>🔈 Lectura en voz alta y dictado por voz en ambos chats.</li>
+        <li>🗓️ Agenda para organizar actividades y recordatorios.</li>
+        <li>🌱 Prevención del bullying y detección temprana de riesgos.</li>
+        <li>🤝 Mejora de la convivencia escolar.</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer>Proyecto Escolar CONFÍA · 2026</footer>
+</div>
+
+<!-- ============ APP DE ADMINISTRADOR (solo paneles, sin chat propio) ============ -->
+<div id="app-admin">
+
+  <div class="barra-superior">
+    <div class="marca-chica">✦ CONFÍA · Administrador</div>
+    <div class="usuario-info-wrap">
+      <button class="btn-tema-toggle" type="button" aria-label="Cambiar entre modo día y modo noche">
+        <span class="icono-tema">☀️</span><span class="texto-tema">Modo día</span>
+      </button>
+      <div class="usuario-badge">
+        <span>🗝️</span><span id="saludo-admin"></span>
+      </div>
+      <button class="boton-salir" id="btn-salir-admin" type="button" aria-label="Cerrar sesión">
+        <span>🚪</span> <span>Cerrar sesión</span>
+      </button>
+    </div>
+  </div>
+
+  <nav>
+    <button class="tab-admin activo" data-seccion-admin="panel-estadisticas">📊 Estadísticas</button>
+    <button class="tab-admin" data-seccion-admin="panel-anuncios">📢 Anuncios</button>
+    <button class="tab-admin" data-seccion-admin="panel-denuncias">🛡️ Denuncias</button>
+    <button class="tab-admin" data-seccion-admin="panel-alertas">🚨 Alertas de riesgo</button>
+  </nav>
+
+  <main>
+
+    <!-- ESTADÍSTICAS POR GRADO -->
+    <section id="panel-estadisticas" class="activa-admin">
+      <div class="eyebrow">Resumen del colegio</div>
+      <h2>📊 Panel de Convivencia y Bienestar</h2>
+      <p class="parrafo">Métricas en tiempo real basadas en la información compartida por los estudiantes.</p>
+
+      <div class="admin-kpis-grid" id="admin-kpis-resumen">
+        <div class="kpi-card">
+          <span class="kpi-icono">👥</span>
+          <div class="kpi-num" id="kpi-total-alumnos">0</div>
+          <div class="kpi-label">Estudiantes registrados</div>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-icono">📈</span>
+          <div class="kpi-num" id="kpi-total-emociones">0</div>
+          <div class="kpi-label">Registros emocionales</div>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-icono">🛡️</span>
+          <div class="kpi-num" id="kpi-total-denuncias">0</div>
+          <div class="kpi-label">Denuncias recibidas</div>
+        </div>
+        <div class="kpi-card" style="border-color: var(--alerta-borde); background: var(--alerta-suave);">
+          <span class="kpi-icono">🚨</span>
+          <div class="kpi-num" id="kpi-total-alertas" style="color: var(--alerta);">0</div>
+          <div class="kpi-label" style="color: var(--alerta);">Alertas de riesgo</div>
+        </div>
+      </div>
+
+      <h3 class="titulo-bloque">Distribución emocional por grado</h3>
+      <div class="tarjeta" style="margin-top: 10px;">
+        <div id="contenedor-estadisticas"></div>
+      </div>
+    </section>
+
+    <section id="panel-anuncios">
+      <div class="eyebrow">Comunicación con el colegio</div>
+      <h2>📢 Anuncios y comunicados</h2>
+      <p class="parrafo">Publica un comunicado general y lo verán todos los alumnos (o solo los del grado que elijas) en su pestaña de "Anuncios". Úsalo, por ejemplo, para avisos de campañas contra el bullying, cambios de horario o mensajes de bienestar.</p>
+
+      <div class="tarjeta">
+        <h3 class="titulo-bloque" style="margin-bottom:12px;">Redactar nuevo anuncio</h3>
+        <form id="form-anuncio">
+          <label for="campo-titulo-anuncio">Título</label>
+          <input type="text" id="campo-titulo-anuncio" placeholder="Ej: Semana de la convivencia escolar" required>
+
+          <label for="campo-mensaje-anuncio">Mensaje</label>
+          <textarea id="campo-mensaje-anuncio" placeholder="Escribe aquí el comunicado para los alumnos..." required></textarea>
+
+          <label for="campo-grado-anuncio">¿Para quién es?</label>
+          <select id="campo-grado-anuncio">
+            <option value="todos">Todos los grados</option>
+            <optgroup label="Primaria">
+              <option>1.° de primaria</option>
+              <option>2.° de primaria</option>
+              <option>3.° de primaria</option>
+              <option>4.° de primaria</option>
+              <option>5.° de primaria</option>
+              <option>6.° de primaria</option>
+            </optgroup>
+            <optgroup label="Secundaria">
+              <option>1.° de secundaria</option>
+              <option>2.° de secundaria</option>
+              <option>3.° de secundaria</option>
+              <option>4.° de secundaria</option>
+              <option>5.° de secundaria</option>
+            </optgroup>
+          </select>
+
+          <button type="submit" class="boton" id="btn-publicar-anuncio">Publicar anuncio</button>
+        </form>
+      </div>
+
+      <h3 class="titulo-bloque" style="margin: 22px 0 4px;">Anuncios publicados</h3>
+      <div id="contenedor-anuncios-admin">
+        <p class="sin-eventos">Aún no has publicado ningún anuncio.</p>
+      </div>
+    </section>
+
+    <section id="panel-denuncias">
+      <div class="eyebrow">Espacio seguro</div>
+      <h2>🛡️ Denuncias anónimas</h2>
+      <p class="parrafo">Se muestra el contenido completo de cada denuncia. Nunca se guarda quién la envió.</p>
+      <div id="contenedor-denuncias-admin">
+        <p class="sin-eventos">Aún no hay denuncias registradas.</p>
+      </div>
+    </section>
+
+    <section id="panel-alertas">
+      <div class="eyebrow">Atención inmediata</div>
+      <h2>🚨 Alertas automáticas de riesgo</h2>
+      <p class="parrafo">Se genera una alerta cuando la conversación de un alumno con la IA de Psicología muestra señales de riesgo real. Contactar cuanto antes a la familia y/o tutor del alumno.</p>
+      <div id="contenedor-alertas-admin">
+        <p class="sin-eventos">No hay alertas de riesgo por el momento.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>Proyecto Escolar CONFÍA · Panel de administrador</footer>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="env.config.js"></script>
+<script>
+  /* =========================================================
+     INTEGRACIÓN CON FIREBASE AUTHENTICATION (ya conectada)
+     ---------------------------------------------------------
+     SOBRE LA IA DEL CHAT (Psicología) — AHORA CON GEMINI
+     ---------------------------------------------------------
+     El chat llama a la función pedirRespuestaIA(), que hace fetch a la
+     API de Gemini (Google AI Studio):
+     "https://generativelanguage.googleapis.com/v1beta/models/MODELO:generateContent"
+
+     Para que funcione necesitas tu propia API key gratuita:
+     1) Entra a https://aistudio.google.com/apikey con tu cuenta de Google.
+     2) Haz clic en "Create API key" y cópiala.
+     3) Pégala abajo donde dice GEMINI_API_KEY = "PEGA_AQUI_TU_LLAVE".
+
+     ADVERTENCIA DE SEGURIDAD: como este es un archivo HTML que corre
+     directo en el navegador, cualquiera que abra el "Inspeccionar" o vea
+     el código fuente de la página puede ver tu llave y usarla, gastando
+     tu cuota gratuita o generando cargos. Esto es aceptable para un
+     proyecto escolar o una demo, pero si vas a publicar CONFÍA para que
+     la use gente de verdad, lo correcto es crear un backend pequeño
+     (por ejemplo una Cloud Function) que reciba el mensaje del
+     estudiante, llame a Gemini con la llave guardada en el servidor
+     (nunca en el navegador) y devuelva la respuesta. En ese caso solo
+     tendrías que cambiar la URL dentro de pedirRespuestaIA() por la de
+     tu backend.
+
+     ---------------------------------------------------------
+     SOBRE EL AUDIO
+     ---------------------------------------------------------
+     La lectura en voz alta usa la Web Speech API del navegador
+     (speechSynthesis), y el dictado usa SpeechRecognition. Son
+     funciones nativas del navegador, no requieren llaves ni conexión
+     a un servicio externo, pero su disponibilidad depende del
+     navegador del estudiante (funcionan bien en Chrome; si el
+     navegador no las soporta, el botón de micrófono se oculta solo).
+     ========================================================= */
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCyl3phv0XonhbG1-sXFzBTTYOLCl8tDwA",
+    authDomain: "confia-1792b.firebaseapp.com",
+    projectId: "confia-1792b",
+    storageBucket: "confia-1792b.firebasestorage.app",
+    messagingSenderId: "204980467142",
+    appId: "1:204980467142:web:9d11a6911de72bd225aec7"
+  };
+
+  // Si Firebase no llega a cargar (por ejemplo, si la red bloquea gstatic.com,
+  // hay un adblocker, o falla la conexión), esto ya NO rompe el resto de la
+  // app: solo el inicio de sesión queda deshabilitado con un aviso claro.
+  let auth = null;
+  let firebaseListo = false;
+  try{
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    firebaseListo = true;
+  }catch(e){
+    console.error('CONFÍA · no se pudo inicializar Firebase (revisa la conexión o si algo está bloqueando gstatic.com):', e);
+  }
+
+  function avisarSinFirebase(elementoAviso){
+    if(elementoAviso){
+      elementoAviso.textContent = 'No se pudo conectar con el sistema de inicio de sesión. Revisa tu conexión a internet, o que la red no esté bloqueando el acceso a Firebase, y recarga la página.';
+      elementoAviso.classList.add('visible');
+    }
+  }
+
+  /* ---------- MOSTRAR / OCULTAR CONTRASEÑA ---------- */
+  document.querySelectorAll('.btn-ver-clave').forEach(boton => {
+    boton.addEventListener('click', () => {
+      const campo = document.getElementById(boton.dataset.objetivo);
+      if(!campo) return;
+      const oculto = campo.type === 'password';
+      campo.type = oculto ? 'text' : 'password';
+      boton.textContent = oculto ? '🙈' : '👁️';
+      boton.setAttribute('aria-label', oculto ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    });
+  });
+
+  /* ---------- RECUPERAR CONTRASEÑA (correo de restablecimiento por Firebase) ---------- */
+  function pedirRecuperacion(idCampoCorreo, elementoAviso){
+    if(!firebaseListo){ avisarSinFirebase(elementoAviso); return; }
+    const correo = document.getElementById(idCampoCorreo).value.trim();
+    if(!correo){
+      elementoAviso.textContent = 'Escribe tu correo arriba y luego toca "¿Olvidaste tu contraseña?" para recibir el enlace de recuperación.';
+      elementoAviso.classList.add('visible');
+      return;
+    }
+    auth.sendPasswordResetEmail(correo)
+      .then(() => {
+        elementoAviso.textContent = 'Listo: si ese correo tiene una cuenta, te llegará un enlace para restablecer la contraseña.';
+        elementoAviso.classList.add('visible');
+      })
+      .catch((err) => {
+        elementoAviso.textContent = traducirErrorFirebase(err);
+        elementoAviso.classList.add('visible');
+      });
+  }
+  document.getElementById('btn-recuperar-clave').addEventListener('click', () => {
+    pedirRecuperacion('campo-usuario', document.getElementById('aviso-acceso'));
+  });
+  document.getElementById('btn-recuperar-clave-admin').addEventListener('click', () => {
+    pedirRecuperacion('campo-usuario-admin', document.getElementById('aviso-acceso-admin'));
+  });
+
+  /* =========================================================
+     MÓDULO DE PERSISTENCIA & AUTENTICACIÓN (Laravel REST API)
+     ---------------------------------------------------------
+     Conectado a: http://127.0.0.1:8000/api
+     Soporta Auth (Estudiantes en 'usuarios', Admins en 'users')
+     y persistencia en MySQL con fallback en LocalStorage.
+     ========================================================= */
+  const CONFIA_API_URL = 'https://confiafront.inyagui.store/api/backend';
+
+  async function apiFetch(endpoint, payload = null, method = 'POST'){
+    try{
+      const url = `${CONFIA_API_URL}/${endpoint}`;
+      const token = localStorage.getItem('confia_token');
+      const headers = { 'Content-Type': 'application/json' };
+      if(token){
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const options = { method, headers };
+      if(payload && method !== 'GET'){
+        options.body = JSON.stringify(payload);
+      }
+      const res = await fetch(url, options);
+      const data = await res.json().catch(() => null);
+      if(!res.ok){
+        throw new Error(data?.message || `HTTP ${res.status}`);
+      }
+      return data;
+    }catch(err){
+      console.warn(`CONFÍA API [${endpoint}] fallback local:`, err.message);
+      return null;
+    }
+  }
+
+  function leerJSON(clave, porDefecto){
+    try{
+      const crudo = localStorage.getItem(clave);
+      return crudo ? JSON.parse(crudo) : porDefecto;
+    }catch(e){
+      console.error('CONFÍA · error al leer', clave, e);
+      return porDefecto;
+    }
+  }
+  function guardarJSON(clave, valor){
+    try{
+      localStorage.setItem(clave, JSON.stringify(valor));
+    }catch(e){
+      console.error('CONFÍA · error al guardar', clave, e);
+    }
+  }
+
+  function guardarGradoUsuario(correo, grado, rol = 'alumno'){
+    const grados = leerJSON('confia-grados', {});
+    grados[correo] = grado;
+    guardarJSON('confia-grados', grados);
+    // Sincroniza con Laravel (tabla 'usuarios')
+    apiFetch('usuarios', { correo, grado, rol });
+  }
+  function obtenerGradoUsuario(correo){
+    const grados = leerJSON('confia-grados', {});
+    return grados[correo] || 'No especificado';
+  }
+
+  async function guardarRegistroEmocional(correo, grado, emocion, intensidad, factores, comentario){
+    const nuevoRegistro = {
+      correo, grado, emocion,
+      intensidad: Number(intensidad) || 5,
+      factores: Array.from(factores || []),
+      comentario: comentario || '',
+    };
+    const registros = leerJSON('confia-registros', []);
+    registros.push({ ...nuevoRegistro, fecha: new Date().toISOString() });
+    guardarJSON('confia-registros', registros);
+
+    // Enviar a Laravel (tabla 'registros_emocionales')
+    const res = await apiFetch('registros-emocionales', nuevoRegistro);
+    return res && res.ok;
+  }
+
+  async function guardarDenuncia(grado, tipo, descripcion){
+    const nuevaDenuncia = { grado, tipo, descripcion };
+    const denuncias = leerJSON('confia-denuncias', []);
+    denuncias.push({ ...nuevaDenuncia, fecha: new Date().toISOString() });
+    guardarJSON('confia-denuncias', denuncias);
+
+    // Enviar a Laravel (tabla 'denuncias')
+    const res = await apiFetch('denuncias', nuevaDenuncia);
+    return res && res.ok;
+  }
+
+  async function obtenerAnuncios(){
+    const res = await apiFetch('anuncios', null, 'GET');
+    if(res && res.ok && Array.isArray(res.datos)){
+      guardarJSON('confia-anuncios', res.datos);
+      return res.datos;
+    }
+    return leerJSON('confia-anuncios', []);
+  }
+
+  async function guardarAnuncio(titulo, mensaje, grado, autor){
+    const id = 'a' + Date.now() + Math.random().toString(36).slice(2,7);
+    const nuevoAnuncio = {
+      id, titulo, mensaje,
+      grado: grado || 'todos',
+      autor: autor || 'Administración',
+    };
+    const anuncios = leerJSON('confia-anuncios', []);
+    anuncios.push({ ...nuevoAnuncio, fecha: new Date().toISOString() });
+    guardarJSON('confia-anuncios', anuncios);
+
+    // Enviar a Laravel (tabla 'anuncios')
+    await apiFetch('anuncios', nuevoAnuncio);
+  }
+
+  async function eliminarAnuncio(id){
+    const anuncios = leerJSON('confia-anuncios', []).filter(a => a.id !== id);
+    guardarJSON('confia-anuncios', anuncios);
+    // Eliminar en Laravel
+    await apiFetch(`anuncios/${encodeURIComponent(id)}`, null, 'DELETE');
+  }
+
+  async function guardarAlertaRiesgo(correo, grado, extracto){
+    const nuevaAlerta = { correo, grado, extracto };
+    const alertas = leerJSON('confia-alertas', []);
+    alertas.push({ ...nuevaAlerta, fecha: new Date().toISOString() });
+    guardarJSON('confia-alertas', alertas);
+
+    // Enviar a Laravel (tabla 'alertas_riesgo')
+    await apiFetch('alertas-riesgo', nuevaAlerta);
+  }
+
+  function claveAgenda(correo){ return 'confia-agenda-' + correo; }
+  function cargarAgendaUsuario(correo){ return leerJSON(claveAgenda(correo), {}); }
+  function guardarAgendaUsuario(correo, agenda){
+    guardarJSON(claveAgenda(correo), agenda);
+  }
+
+  function esAdministrador(correo){
+    const admins = leerJSON('confia-admins', []);
+    return admins.includes(correo);
+  }
+  function agregarAdministrador(correo){
+    const admins = leerJSON('confia-admins', []);
+    if(!admins.includes(correo)){
+      admins.push(correo);
+      guardarJSON('confia-admins', admins);
+    }
+  }
+
+  let modoRegistro = false;
+  let usuarioActual = null;
+  let gradoActual = null;
+
+  const tabLogin = document.getElementById('tab-login');
+  const tabRegistro = document.getElementById('tab-registro');
+  const btnAcceso = document.getElementById('btn-acceso');
+  const camposRegistro = document.querySelectorAll('.campo-registro');
+  const avisoAcceso = document.getElementById('aviso-acceso');
+
+  tabLogin.addEventListener('click', () => cambiarModo(false));
+  tabRegistro.addEventListener('click', () => cambiarModo(true));
+
+  function cambiarModo(esRegistro){
+    modoRegistro = esRegistro;
+    tabLogin.classList.toggle('activo', !esRegistro);
+    tabRegistro.classList.toggle('activo', esRegistro);
+    camposRegistro.forEach(c => c.classList.toggle('visible', esRegistro));
+    btnAcceso.textContent = esRegistro ? 'Crear cuenta' : 'Iniciar sesión';
+    avisoAcceso.classList.remove('visible');
+  }
+
+  document.getElementById('form-acceso').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const usuario = document.getElementById('campo-usuario').value.trim();
+    const clave = document.getElementById('campo-clave').value;
+
+    if(modoRegistro){
+      const claveConfirmar = document.getElementById('campo-clave-confirmar').value;
+      if(clave !== claveConfirmar){
+        avisoAcceso.textContent = 'Las contraseñas no coinciden.';
+        avisoAcceso.classList.add('visible');
+        return;
+      }
+      registrarUsuario(usuario, clave);
+    } else {
+      iniciarSesion(usuario, clave);
+    }
+  });
+
+  function traducirErrorFirebase(err){
+    switch(err.code){
+      case 'auth/email-already-in-use': return 'Ese correo ya está registrado. Prueba iniciar sesión.';
+      case 'auth/invalid-email': return 'El correo no tiene un formato válido.';
+      case 'auth/weak-password': return 'La contraseña debe tener al menos 6 caracteres.';
+      case 'auth/user-not-found': return 'No existe una cuenta con ese correo.';
+      case 'auth/wrong-password':
+      case 'auth/invalid-credential': return 'Correo o contraseña incorrectos.';
+      case 'auth/too-many-requests': return 'Demasiados intentos. Espera un momento e intenta de nuevo.';
+      default: return 'Ocurrió un error al conectar con Firebase: ' + err.message;
+    }
+  }
+
+  async function llamarLoginBackend(correo, clave){
+    const res = await fetch(`${CONFIA_API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: correo, password: clave })
+    });
+    const data = await res.json().catch(() => null);
+    if(!res.ok){
+      throw new Error(data?.message || data?.statusMessage || 'Credenciales inválidas.');
+    }
+    return data;
+  }
+
+  async function llamarRegistroBackend(correo, clave, grado){
+    const res = await fetch(`${CONFIA_API_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: correo, password: clave, grado: grado })
+    });
+    const data = await res.json().catch(() => null);
+    if(!res.ok){
+      throw new Error(data?.message || data?.statusMessage || 'No se pudo crear la cuenta de estudiante.');
+    }
+    return data;
+  }
+
+  async function llamarAdminRegistroBackend(correo, clave, codigo){
+    const res = await fetch(`${CONFIA_API_URL}/auth/admin/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: correo, password: clave, codigo: codigo })
+    });
+    const data = await res.json().catch(() => null);
+    if(!res.ok){
+      throw new Error(data?.message || data?.statusMessage || 'No se pudo crear la cuenta de administrador.');
+    }
+    return data;
+  }
+
+  async function registrarUsuario(correo, clave){
+    btnAcceso.disabled = true;
+    const grado = document.getElementById('campo-grado-select').value;
+    try {
+      const data = await llamarRegistroBackend(correo, clave, grado);
+      const token = data?.token || data?.access_token || data?.data?.token;
+      if(token) localStorage.setItem('confia_token', token);
+
+      usuarioActual = data?.user?.email || data?.user?.usuario || correo;
+      guardarGradoUsuario(usuarioActual, grado);
+      entrarAlApp();
+      mostrarToast('¡Cuenta creada con éxito! Bienvenido/a 🌱', 'exito');
+    } catch(err) {
+      avisoAcceso.textContent = err.message;
+      avisoAcceso.classList.add('visible');
+    } finally {
+      btnAcceso.disabled = false;
+    }
+  }
+
+  async function iniciarSesion(correo, clave){
+    btnAcceso.disabled = true;
+    try {
+      const data = await llamarLoginBackend(correo, clave);
+      const token = data?.token || data?.access_token || data?.data?.token;
+      if(token) localStorage.setItem('confia_token', token);
+
+      usuarioActual = data?.user?.email || data?.user?.usuario || correo;
+      if(data?.user?.grado) {
+        guardarGradoUsuario(usuarioActual, data.user.grado, data.user.role || data.user.rol || 'alumno');
+      }
+      entrarAlApp();
+    } catch(err) {
+      avisoAcceso.textContent = err.message;
+      avisoAcceso.classList.add('visible');
+    } finally {
+      btnAcceso.disabled = false;
+    }
+  }
+
+  function entrarAlApp(){
+    document.getElementById('pantalla-acceso').style.display = 'none';
+    const app = document.getElementById('app');
+    app.classList.add('visible');
+    document.getElementById('saludo-usuario').textContent = usuarioActual;
+
+    gradoActual = obtenerGradoUsuario(usuarioActual);
+    // Carga la agenda guardada de este alumno (persistente entre sesiones)
+    Object.keys(eventosAgenda).forEach(k => delete eventosAgenda[k]);
+    Object.assign(eventosAgenda, cargarAgendaUsuario(usuarioActual));
+    diaSeleccionado = claveFecha(new Date());
+    renderCalendario();
+    renderEventos();
+    renderAnunciosAlumno();
+  }
+
+  function cerrarSesion(){
+    localStorage.removeItem('confia_token');
+    localStorage.removeItem('confia_usuario');
+    usuarioActual = null;
+    gradoActual = null;
+    document.getElementById('app').classList.remove('visible');
+    document.getElementById('app-admin').classList.remove('visible');
+    document.getElementById('pantalla-acceso').style.display = 'flex';
+    document.getElementById('form-acceso').reset();
+    document.getElementById('form-acceso-admin').reset();
+    if(typeof mostrarToast === 'function'){
+      mostrarToast('Has cerrado sesión correctamente 👋', 'info');
+    }
+  }
+
+  document.getElementById('btn-salir').addEventListener('click', cerrarSesion);
+
+  /* =========================================================
+     ACCESO DE ADMINISTRADOR (separado del de alumnos)
+     ---------------------------------------------------------
+     Código que habilita crear una cuenta de administrador.
+     ========================================================= */
+  const CODIGO_ADMIN = "290709";
+
+  const tabAlumno = document.getElementById('tab-alumno');
+  const tabAdmin = document.getElementById('tab-admin');
+  const tarjetaAlumno = document.getElementById('tarjeta-acceso-alumno');
+  const tarjetaAdmin = document.getElementById('tarjeta-acceso-admin');
+
+  tabAlumno.addEventListener('click', () => {
+    tabAlumno.classList.add('activo');
+    tabAdmin.classList.remove('activo');
+    tarjetaAlumno.style.display = 'block';
+    tarjetaAdmin.style.display = 'none';
+  });
+  tabAdmin.addEventListener('click', () => {
+    tabAdmin.classList.add('activo');
+    tabAlumno.classList.remove('activo');
+    tarjetaAdmin.style.display = 'block';
+    tarjetaAlumno.style.display = 'none';
+  });
+
+  let modoRegistroAdmin = false;
+  const tabAdminLogin = document.getElementById('tab-admin-login');
+  const tabAdminRegistro = document.getElementById('tab-admin-registro');
+  const btnAccesoAdmin = document.getElementById('btn-acceso-admin');
+  const campoCodigoAdminContenedor = document.getElementById('campo-codigo-admin-contenedor');
+  const avisoAccesoAdmin = document.getElementById('aviso-acceso-admin');
+
+  function cambiarModoAdmin(esRegistro){
+    modoRegistroAdmin = esRegistro;
+    tabAdminLogin.classList.toggle('activo', !esRegistro);
+    tabAdminRegistro.classList.toggle('activo', esRegistro);
+    campoCodigoAdminContenedor.classList.toggle('visible', esRegistro);
+    btnAccesoAdmin.textContent = esRegistro ? 'Crear cuenta' : 'Iniciar sesión';
+    avisoAccesoAdmin.classList.remove('visible');
+  }
+  tabAdminLogin.addEventListener('click', () => cambiarModoAdmin(false));
+  tabAdminRegistro.addEventListener('click', () => cambiarModoAdmin(true));
+
+  document.getElementById('form-acceso-admin').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const correo = document.getElementById('campo-usuario-admin').value.trim();
+    const clave = document.getElementById('campo-clave-admin').value;
+
+    if(modoRegistroAdmin){
+      const codigo = document.getElementById('campo-codigo-admin').value;
+      if(codigo !== CODIGO_ADMIN){
+        avisoAccesoAdmin.textContent = 'El código de administrador no es correcto.';
+        avisoAccesoAdmin.classList.add('visible');
+        return;
+      }
+      btnAccesoAdmin.disabled = true;
+      try {
+        const data = await llamarAdminRegistroBackend(correo, clave, codigo);
+        const token = data?.token || data?.access_token || data?.data?.token;
+        if(token) localStorage.setItem('confia_token', token);
+        agregarAdministrador(correo);
+        entrarAlPanelAdmin(correo);
+        mostrarToast('¡Cuenta de administrador creada con éxito! 🛡️', 'exito');
+      } catch(err) {
+        avisoAccesoAdmin.textContent = err.message;
+        avisoAccesoAdmin.classList.add('visible');
+      } finally {
+        btnAccesoAdmin.disabled = false;
+      }
+    } else {
+      btnAccesoAdmin.disabled = true;
+      try {
+        const data = await llamarLoginBackend(correo, clave);
+        const token = data?.token || data?.access_token || data?.data?.token;
+        if(token) localStorage.setItem('confia_token', token);
+
+        const rol = data?.user?.role || data?.user?.rol;
+        if(rol !== 'admin' && !esAdministrador(correo)){
+          // Permitir acceso de admin si está en lista local o código
+          agregarAdministrador(correo);
+        }
+        entrarAlPanelAdmin(correo);
+      } catch(err) {
+        avisoAccesoAdmin.textContent = err.message;
+        avisoAccesoAdmin.classList.add('visible');
+      } finally {
+        btnAccesoAdmin.disabled = false;
+      }
+    }
+  });
+
+  function entrarAlPanelAdmin(correo){
+    document.getElementById('pantalla-acceso').style.display = 'none';
+    document.getElementById('app-admin').classList.add('visible');
+    document.getElementById('saludo-admin').textContent = correo;
+    renderEstadisticasAdmin();
+    renderAnunciosAdmin();
+    renderDenunciasAdmin();
+    renderAlertasAdmin();
+  }
+
+  document.getElementById('btn-salir-admin').addEventListener('click', cerrarSesion);
+
+  const tabsAdmin = document.querySelectorAll('.tab-admin');
+  const seccionesAdmin = document.querySelectorAll('#app-admin main section');
+  tabsAdmin.forEach(tab => tab.addEventListener('click', () => {
+    tabsAdmin.forEach(t => t.classList.toggle('activo', t === tab));
+    seccionesAdmin.forEach(s => s.classList.toggle('activa-admin', s.id === tab.dataset.seccionAdmin));
+  }));
+
+  /* ---------- SISTEMA DE NOTIFICACIONES TOAST ---------- */
+  function mostrarToast(mensaje, tipo = 'exito'){
+    let cont = document.getElementById('toast-contenedor');
+    if(!cont){
+      cont = document.createElement('div');
+      cont.id = 'toast-contenedor';
+      document.body.appendChild(cont);
+    }
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${tipo}`;
+    const icono = tipo === 'exito' ? '✨' : (tipo === 'alerta' ? '🚨' : 'ℹ️');
+    toast.innerHTML = `<span>${icono}</span><span>${mensaje}</span>`;
+    cont.appendChild(toast);
+    setTimeout(() => toast.classList.add('visible'), 20);
+    setTimeout(() => {
+      toast.classList.remove('visible');
+      setTimeout(() => toast.remove(), 350);
+    }, 4000);
+  }
+
+  /* ---------- PANEL: ESTADÍSTICAS POR GRADO & KPIS ---------- */
+  async function renderEstadisticasAdmin(){
+    const contenedor = document.getElementById('contenedor-estadisticas');
+    let registros = [];
+    const res = await apiFetch('registros-emocionales', null, 'GET');
+    if(res && res.ok && Array.isArray(res.datos)){
+      registros = res.datos;
+      guardarJSON('confia-registros', registros);
+    } else {
+      registros = leerJSON('confia-registros', []);
+    }
+
+    // Actualizar tarjetas de métricas KPI
+    const totalAlumnosEl = document.getElementById('kpi-total-alumnos');
+    const totalEmocionesEl = document.getElementById('kpi-total-emociones');
+    const totalDenunciasEl = document.getElementById('kpi-total-denuncias');
+    const totalAlertasEl = document.getElementById('kpi-total-alertas');
+
+    const denuncias = leerJSON('confia-denuncias', []);
+    const alertas = leerJSON('confia-alertas', []);
+    const alumnosUnicos = new Set(registros.map(r => r.correo));
+
+    if(totalAlumnosEl) totalAlumnosEl.textContent = alumnosUnicos.size || (registros.length ? 1 : 0);
+    if(totalEmocionesEl) totalEmocionesEl.textContent = registros.length;
+    if(totalDenunciasEl) totalDenunciasEl.textContent = denuncias.length;
+    if(totalAlertasEl) totalAlertasEl.textContent = alertas.length;
+
+    if(registros.length === 0){
+      contenedor.innerHTML = '<p class="sin-eventos">Aún no hay registros emocionales guardados en la base de datos.</p>';
+      return;
+    }
+
+    // Agrupa por grado y cuenta cuántas veces se reportó cada emoción
+    const porGrado = {};
+    registros.forEach(r => {
+      const grado = r.grado || 'No especificado';
+      if(!porGrado[grado]) porGrado[grado] = {};
+      porGrado[grado][r.emocion] = (porGrado[grado][r.emocion] || 0) + 1;
+    });
+
+    contenedor.innerHTML = '';
+    Object.keys(porGrado).sort().forEach(grado => {
+      const bloque = document.createElement('div');
+      bloque.style.marginBottom = '20px';
+      const total = Object.values(porGrado[grado]).reduce((a,b) => a+b, 0);
+
+      const titulo = document.createElement('h4');
+      titulo.style.margin = '0 0 8px';
+      titulo.style.color = 'var(--guinda)';
+      titulo.style.fontSize = '16px';
+      titulo.textContent = grado + ' · ' + total + (total === 1 ? ' registro' : ' registros');
+      bloque.appendChild(titulo);
+
+      Object.entries(porGrado[grado]).sort((a,b) => b[1]-a[1]).forEach(([emocion, cuenta]) => {
+        const fila = document.createElement('div');
+        fila.className = 'fila-admin';
+        const pct = Math.round((cuenta/total)*100);
+        fila.innerHTML = `<span style="min-width:90px;">${emocion}</span><span class="valor-barra"><span style="width:${pct}%"></span></span><span style="font-weight:600; min-width:24px; text-align:right;">${cuenta}</span>`;
+        bloque.appendChild(fila);
+      });
+      contenedor.appendChild(bloque);
+    });
+  }
+
+  /* ---------- PANEL: ANUNCIOS / COMUNICADOS GENERALES ---------- */
+  document.getElementById('form-anuncio').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const titulo = document.getElementById('campo-titulo-anuncio').value.trim();
+    const mensaje = document.getElementById('campo-mensaje-anuncio').value.trim();
+    const grado = document.getElementById('campo-grado-anuncio').value;
+    if(!titulo || !mensaje) return;
+    await guardarAnuncio(titulo, mensaje, grado, document.getElementById('saludo-admin').textContent);
+    document.getElementById('form-anuncio').reset();
+    mostrarToast('¡Comunicado escolar publicado con éxito! 📢', 'exito');
+    renderAnunciosAdmin();
+  });
+
+  async function renderAnunciosAdmin(){
+    const contenedor = document.getElementById('contenedor-anuncios-admin');
+    const anuncios = (await obtenerAnuncios()).slice().reverse();
+    if(anuncios.length === 0){
+      contenedor.innerHTML = '<p class="sin-eventos">Aún no has publicado ningún anuncio.</p>';
+      return;
+    }
+    contenedor.innerHTML = '';
+    anuncios.forEach(a => {
+      const div = document.createElement('div');
+      div.className = 'tarjeta-anuncio';
+      const fecha = new Date(a.fecha).toLocaleString('es-PE');
+      div.innerHTML = `
+        <div class="meta-anuncio">
+          <span>${fecha}</span>
+          <span class="etiqueta-grado-anuncio">${a.grado === 'todos' ? 'Todos los grados' : a.grado}</span>
+        </div>
+        <h4></h4>
+        <p class="parrafo" style="margin:0 0 10px;"></p>
+        <button type="button" class="btn-borrar-anuncio">Eliminar anuncio</button>
+      `;
+      div.querySelector('h4').textContent = a.titulo;
+      div.querySelector('p').textContent = a.mensaje;
+      div.querySelector('.btn-borrar-anuncio').addEventListener('click', async () => {
+        await eliminarAnuncio(a.id);
+        mostrarToast('Anuncio eliminado del sistema 🗑️', 'info');
+        renderAnunciosAdmin();
+        renderAnunciosAlumno();
+      });
+      contenedor.appendChild(div);
+    });
+  }
+
+  /* ---------- ANUNCIOS: vista de solo lectura para alumnos ---------- */
+  async function renderAnunciosAlumno(){
+    const contenedor = document.getElementById('contenedor-anuncios-alumno');
+    if(!contenedor) return;
+    const todosAnuncios = await obtenerAnuncios();
+    const anuncios = todosAnuncios
+      .filter(a => a.grado === 'todos' || a.grado === gradoActual)
+      .slice().reverse();
+    if(anuncios.length === 0){
+      contenedor.innerHTML = '<p class="sin-eventos">Todavía no hay anuncios publicados.</p>';
+      return;
+    }
+    contenedor.innerHTML = '';
+    anuncios.forEach(a => {
+      const div = document.createElement('div');
+      div.className = 'tarjeta-anuncio';
+      const fecha = new Date(a.fecha).toLocaleString('es-PE');
+      div.innerHTML = `
+        <div class="meta-anuncio">
+          <span>${fecha}</span>
+          <span class="etiqueta-grado-anuncio">${a.grado === 'todos' ? 'Todos los grados' : a.grado}</span>
+        </div>
+        <h4></h4>
+        <p class="parrafo" style="margin:0;"></p>
+      `;
+      div.querySelector('h4').textContent = a.titulo;
+      div.querySelector('p').textContent = a.mensaje;
+      contenedor.appendChild(div);
+    });
+  }
+
+  /* ---------- PANEL: DENUNCIAS ANÓNIMAS ---------- */
+  async function renderDenunciasAdmin(){
+    const contenedor = document.getElementById('contenedor-denuncias-admin');
+    let denuncias = [];
+    const res = await apiFetch('denuncias', null, 'GET');
+    if(res && res.ok && Array.isArray(res.datos)){
+      denuncias = res.datos;
+      guardarJSON('confia-denuncias', denuncias);
+    } else {
+      denuncias = leerJSON('confia-denuncias', []);
+    }
+
+    if(denuncias.length === 0){
+      contenedor.innerHTML = '<p class="sin-eventos">Aún no hay denuncias registradas en la base de datos.</p>';
+      return;
+    }
+    contenedor.innerHTML = '';
+    denuncias.forEach(d => {
+      const div = document.createElement('div');
+      div.className = 'tarjeta-denuncia';
+      const fecha = new Date(d.fecha).toLocaleString('es-PE');
+      div.innerHTML = `<div class="meta-denuncia">${d.grado} · ${d.tipo} · ${fecha}</div><p class="parrafo" style="margin:0;"></p>`;
+      div.querySelector('p').textContent = d.descripcion;
+      contenedor.appendChild(div);
+    });
+  }
+
+  /* ---------- PANEL: ALERTAS AUTOMÁTICAS DE RIESGO ---------- */
+  async function renderAlertasAdmin(){
+    const contenedor = document.getElementById('contenedor-alertas-admin');
+    let alertas = [];
+    const res = await apiFetch('alertas-riesgo', null, 'GET');
+    if(res && res.ok && Array.isArray(res.datos)){
+      alertas = res.datos;
+      guardarJSON('confia-alertas', alertas);
+    } else {
+      alertas = leerJSON('confia-alertas', []);
+    }
+
+    if(alertas.length === 0){
+      contenedor.innerHTML = '<p class="sin-eventos">No hay alertas de riesgo por el momento.</p>';
+      return;
+    }
+    contenedor.innerHTML = '';
+    alertas.forEach(a => {
+      const div = document.createElement('div');
+      div.className = 'tarjeta-alerta';
+      const fecha = new Date(a.fecha).toLocaleString('es-PE');
+      div.innerHTML = `<div class="meta-alerta">⚠ ${a.grado} · ${a.correo} · ${fecha}</div><p class="parrafo" style="margin:0;"></p>`;
+      div.querySelector('p').textContent = a.extracto;
+      contenedor.appendChild(div);
+    });
+  }
+
+  /* ---------- SUGERENCIAS RÁPIDAS EN CHAT ---------- */
+  document.querySelectorAll('.chip-sugerencia').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const input = document.getElementById('entrada-chat-psicologia');
+      if(input && chip.dataset.texto){
+        input.value = chip.dataset.texto;
+        input.focus();
+        document.getElementById('btn-enviar-chat-psicologia').click();
+      }
+    });
+  });
+
+  /* ---------- NAVEGACIÓN ENTRE SECCIONES ---------- */
+  const tabs = document.querySelectorAll('.tab');
+  const secciones = document.querySelectorAll('main section');
+
+  function irASeccion(idSeccion){
+    tabs.forEach(t => t.classList.toggle('activo', t.dataset.seccion === idSeccion));
+    secciones.forEach(s => s.classList.toggle('activa', s.id === idSeccion));
+    document.querySelector('main').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  tabs.forEach(tab => tab.addEventListener('click', () => irASeccion(tab.dataset.seccion)));
+
+  document.querySelectorAll('.inicio-card').forEach(card => {
+    card.addEventListener('click', () => irASeccion(card.dataset.seccion));
+    card.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); irASeccion(card.dataset.seccion); }
+    });
+  });
+
+  /* ---------- ESTADO DE ÁNIMO Y PAQUETES DE APOYO ---------- */
+  const NOMBRES_PAQUETE = {
+    calma: 'Paquete de Calma',
+    acompanamiento: 'Paquete de Acompañamiento',
+    descanso: 'Paquete Descanso'
+  };
+  const MENSAJE_ESTADO = {
+    bien: 'Qué bueno que te sientes así 🙂 Te recomendamos el',
+    neutral: 'Está bien sentirse así, no siempre hay que estar arriba ni abajo. Te recomendamos el',
+    mal: 'Gracias por reconocerlo, eso ya es un paso importante. Te recomendamos el'
+  };
+
+  function abrirPaquete(idPaquete, hacerScroll){
+    document.querySelectorAll('.paquete-card').forEach(card => {
+      const esEste = card.id === 'paquete-' + idPaquete;
+      card.classList.toggle('abierto', esEste ? true : card.classList.contains('abierto'));
+    });
+    const tarjeta = document.getElementById('paquete-' + idPaquete);
+    if(tarjeta && hacerScroll){
+      tarjeta.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+  }
+
+  document.querySelectorAll('.estado-card').forEach(boton => {
+    boton.addEventListener('click', () => {
+      document.querySelectorAll('.estado-card').forEach(b => b.classList.remove('activo'));
+      boton.classList.add('activo');
+
+      document.querySelectorAll('.paquete-card').forEach(c => c.classList.remove('recomendado'));
+      const idPaquete = boton.dataset.paquete;
+      const tarjetaPaquete = document.getElementById('paquete-' + idPaquete);
+      if(tarjetaPaquete) tarjetaPaquete.classList.add('recomendado');
+
+      const cajaSugerencia = document.getElementById('sugerencia-estado');
+      cajaSugerencia.innerHTML = MENSAJE_ESTADO[boton.dataset.estado] + ' <strong>' + NOMBRES_PAQUETE[idPaquete] + '</strong>, aquí abajo 👇';
+      cajaSugerencia.classList.add('visible');
+
+      abrirPaquete(idPaquete, true);
+    });
+  });
+
+  document.querySelectorAll('.paquete-cabecera').forEach(cabecera => {
+    cabecera.addEventListener('click', () => {
+      cabecera.closest('.paquete-card').classList.toggle('abierto');
+    });
+  });
+
+  document.querySelectorAll('.paquete-boton').forEach(boton => {
+    boton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      irASeccion(boton.dataset.ir);
+    });
+  });
+
+  /* ---------- REGISTRO EMOCIONAL ---------- */
+  let emocionSeleccionada = null;
+  document.querySelectorAll('.emocion-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.emocion-chip').forEach(c => c.classList.remove('seleccionada'));
+      chip.classList.add('seleccionada');
+      emocionSeleccionada = chip.dataset.valor;
+    });
+  });
+
+  const factoresSeleccionados = new Set();
+  document.querySelectorAll('.factor-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      chip.classList.toggle('seleccionada');
+      if(chip.classList.contains('seleccionada')) factoresSeleccionados.add(chip.dataset.valor);
+      else factoresSeleccionados.delete(chip.dataset.valor);
+    });
+  });
+
+  const intensidadInput = document.getElementById('intensidad-emocion');
+  const valorIntensidad = document.getElementById('valor-intensidad');
+  intensidadInput.addEventListener('input', () => {
+    valorIntensidad.textContent = intensidadInput.value;
+  });
+
+  document.getElementById('btn-registro').addEventListener('click', async () => {
+    if(!emocionSeleccionada){
+      mostrarToast('Por favor selecciona una emoción antes de guardar 💭', 'alerta');
+      return;
+    }
+    await guardarRegistroEmocional(
+      usuarioActual,
+      gradoActual,
+      emocionSeleccionada,
+      Number(intensidadInput.value),
+      factoresSeleccionados,
+      document.getElementById('comentario-registro').value.trim()
+    );
+    mostrarToast('¡Tu registro emocional se guardó en tu diario! 🌱', 'exito');
+    const conf = document.getElementById('confirmacion-registro');
+    conf.classList.add('visible');
+    setTimeout(() => conf.classList.remove('visible'), 3500);
+  });
+
+  /* ---------- DENUNCIA ANÓNIMA ---------- */
+  document.getElementById('btn-denuncia').addEventListener('click', async () => {
+    const grado = document.getElementById('grado-denuncia').value;
+    const tipo = document.getElementById('tipo-denuncia').value;
+    const descripcion = document.getElementById('descripcion-denuncia').value.trim();
+    if(!descripcion){
+      mostrarToast('Por favor escribe el detalle de la situación ✍️', 'alerta');
+      return;
+    }
+    await guardarDenuncia(grado, tipo, descripcion);
+    mostrarToast('Denuncia anónima enviada de forma segura 🛡️', 'exito');
+    const conf = document.getElementById('confirmacion-denuncia');
+    conf.classList.add('visible');
+    setTimeout(() => conf.classList.remove('visible'), 3500);
+    document.getElementById('descripcion-denuncia').value = '';
+  });
+
+  /* ---------- AGENDA / CALENDARIO ---------- */
+  const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const DIAS_SEMANA = ['L','M','X','J','V','S','D'];
+  const eventosAgenda = {}; // 'YYYY-MM-DD' -> [ 'título', ... ]
+
+  let fechaCalendario = new Date();
+  fechaCalendario.setDate(1);
+
+  function claveFecha(d){
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  let diaSeleccionado = claveFecha(new Date());
+
+  function renderCalendario(){
+    const grid = document.getElementById('calendario-grid');
+    const label = document.getElementById('calendario-mes-label');
+    grid.innerHTML = '';
+    label.textContent = MESES[fechaCalendario.getMonth()] + ' de ' + fechaCalendario.getFullYear();
+
+    DIAS_SEMANA.forEach(d => {
+      const el = document.createElement('div');
+      el.className = 'dia-semana';
+      el.textContent = d;
+      grid.appendChild(el);
+    });
+
+    const primerDia = new Date(fechaCalendario.getFullYear(), fechaCalendario.getMonth(), 1);
+    const diasEnMes = new Date(fechaCalendario.getFullYear(), fechaCalendario.getMonth()+1, 0).getDate();
+    let offset = primerDia.getDay() - 1;
+    if(offset < 0) offset = 6;
+
+    for(let i=0;i<offset;i++){
+      const vacio = document.createElement('div');
+      vacio.className = 'dia-celda vacio';
+      grid.appendChild(vacio);
+    }
+
+    const hoyClave = claveFecha(new Date());
+
+    for(let dia=1; dia<=diasEnMes; dia++){
+      const fecha = new Date(fechaCalendario.getFullYear(), fechaCalendario.getMonth(), dia);
+      const clave = claveFecha(fecha);
+      const celda = document.createElement('div');
+      celda.className = 'dia-celda';
+      if(clave === hoyClave) celda.classList.add('hoy');
+      if(clave === diaSeleccionado) celda.classList.add('seleccionado');
+      celda.textContent = dia;
+      if(eventosAgenda[clave] && eventosAgenda[clave].length){
+        const punto = document.createElement('span');
+        punto.className = 'punto';
+        celda.appendChild(punto);
+      }
+      celda.addEventListener('click', () => {
+        diaSeleccionado = clave;
+        renderCalendario();
+        renderEventos();
+      });
+      grid.appendChild(celda);
+    }
+  }
+
+  function renderEventos(){
+    const lista = document.getElementById('lista-eventos');
+    const sinEventos = document.getElementById('sin-eventos');
+    lista.innerHTML = '';
+    const eventos = eventosAgenda[diaSeleccionado] || [];
+
+    if(eventos.length === 0){
+      sinEventos.style.display = 'block';
+      return;
+    }
+    sinEventos.style.display = 'none';
+
+    eventos.forEach((titulo, idx) => {
+      const li = document.createElement('li');
+      const span = document.createElement('span');
+      span.textContent = titulo;
+      const btnBorrar = document.createElement('button');
+      btnBorrar.textContent = 'Eliminar';
+      btnBorrar.addEventListener('click', () => {
+        eventosAgenda[diaSeleccionado].splice(idx, 1);
+        if(usuarioActual) guardarAgendaUsuario(usuarioActual, eventosAgenda);
+        renderCalendario();
+        renderEventos();
+      });
+      li.appendChild(span);
+      li.appendChild(btnBorrar);
+      lista.appendChild(li);
+    });
+  }
+
+  document.getElementById('mes-anterior').addEventListener('click', () => {
+    fechaCalendario.setMonth(fechaCalendario.getMonth()-1);
+    renderCalendario();
+  });
+  document.getElementById('mes-siguiente').addEventListener('click', () => {
+    fechaCalendario.setMonth(fechaCalendario.getMonth()+1);
+    renderCalendario();
+  });
+  document.getElementById('form-evento').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = document.getElementById('titulo-evento');
+    const titulo = input.value.trim();
+    if(!titulo) return;
+    if(!eventosAgenda[diaSeleccionado]) eventosAgenda[diaSeleccionado] = [];
+    eventosAgenda[diaSeleccionado].push(titulo);
+    if(usuarioActual) guardarAgendaUsuario(usuarioActual, eventosAgenda);
+    input.value = '';
+    renderCalendario();
+    renderEventos();
+  });
+
+  renderCalendario();
+  renderEventos();
+
+  /* ---------- PALABRAS DE RIESGO (se revisan antes de llamar a la IA) ---------- */
+  const PALABRAS_RIESGO = [
+    'suicid', 'matarme', 'quitarme la vida', 'quiero morir', 'quiero morirme',
+    'no quiero vivir', 'no quiero seguir viviendo', 'no quiero estar aquí',
+    'mejor sin mí', 'mejor sin mi', 'no vale la pena vivir', 'desaparecer para siempre',
+    'cortarme', 'lastimarme', 'hacerme daño', 'autolesion', 'autolesión'
+  ];
+  const MENSAJE_RIESGO = 'No, no quiero que sientas que esa es la salida. Lo que sientes ahora es muy fuerte, pero se puede pedir ayuda y las cosas pueden cambiar. Por favor, dile esto mismo ahora a un adulto de confianza, un docente o un familiar, o acude a un profesional de salud mental o a una línea de emergencia de tu país. No tienes que pasar por esto solo/a, y esto es más importante que seguir chateando conmigo.';
+
+  function contieneRiesgo(texto){
+    const t = texto.toLowerCase();
+    return PALABRAS_RIESGO.some(p => t.includes(p));
+  }
+
+  /* ---------- LLAMADA A LA IA REAL (GEMINI) ----------
+     La API key NO vive en este archivo (que se sube a git/GitHub).
+     Vive en env.config.js, un archivo local que está en .gitignore
+     y nunca se commitea. Copiá env.config.example.js -> env.config.js
+     y pegá ahí tu key real. Ver ese archivo para instrucciones.
+
+     ADVERTENCIA: como este HTML corre directo en el navegador, cualquiera
+     que vea el código fuente de la página puede ver esta llave y usarla
+     con tu cuota. Restringí la key en Google Cloud Console (HTTP referrer
+     = tu dominio, API = solo Gemini) para que no se pueda usar desde otro
+     lado. Si vas a publicar CONFÍA para uso real, lo más seguro es mover
+     esta llamada a un backend (por ejemplo una Cloud Function) que guarde
+     la llave del lado del servidor y nunca la exponga en el navegador.
+  */
+  const GEMINI_API_KEY = window.GEMINI_API_KEY || "";
+  const GEMINI_MODELO = "gemini-3.6-flash";
+  const MAX_MENSAJES_HISTORIAL = 16; // ~8 turnos de ida y vuelta
+
+  async function pedirRespuestaIA(systemPrompt, historial){
+    // Solo mandamos los últimos mensajes: respuestas más enfocadas y más rápidas
+    const historialRecortado = historial.slice(-MAX_MENSAJES_HISTORIAL);
+    const contents = historialRecortado.map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
+    }));
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODELO}:generateContent`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": GEMINI_API_KEY
+        },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: systemPrompt }] },
+          contents: contents,
+          generationConfig: {
+            temperature: 0.8,   // algo de calidez/variedad sin desvariar
+            topP: 0.9,
+            // Los modelos "gemini-3.x" razonan antes de responder y ese razonamiento
+            // gastaba casi todo maxOutputTokens, dejando la respuesta a medias o vacía.
+            // thinkingLevel "low" reduce ese gasto interno para chats conversacionales,
+            // y subimos el límite de salida para tener margen de sobra.
+            maxOutputTokens: 4096,
+            thinkingConfig: {
+              thinkingLevel: "low"
+            }
+          }
+        })
+      }
+    );
+    if(!response.ok){
+      const detalle = await response.text().catch(() => '');
+      throw new Error('Error de red al llamar a la IA: ' + detalle);
+    }
+    const data = await response.json();
+    const candidato = data?.candidates?.[0];
+
+    const partes = candidato?.content?.parts || [];
+    const texto = partes.map(p => p.text || '').join('\n').trim();
+    const finReason = candidato?.finishReason || 'desconocido';
+
+    if(!texto){
+      if(finReason === 'MAX_TOKENS'){
+        throw new Error('La respuesta se cortó porque llegó al límite de tokens antes de escribir texto (probablemente todo se fue en "pensar"). Intenta con un mensaje más corto.');
+      }
+      throw new Error('La IA no devolvió una respuesta utilizable (finishReason: ' + finReason + ')');
+    }
+    // Si el texto llegó cortado a la mitad de una frase por el límite de tokens, lo avisamos
+    // en vez de mostrar la respuesta incompleta como si fuera normal.
+    if(finReason === 'MAX_TOKENS'){
+      return texto + '\n\n[Nota: esta respuesta se cortó por longitud. Puedes pedirme que continúe.]';
+    }
+    return texto;
+  }
+
+  /* ---------- FÁBRICA DE CHAT (Psicología) ---------- */
+  function crearChat(config){
+    const ventana = document.getElementById(config.idVentana);
+    const input = document.getElementById(config.idInput);
+    const btnEnviar = document.getElementById(config.idEnviar);
+    const btnAudio = document.getElementById(config.idAudio);
+    const btnMic = document.getElementById(config.idMic);
+
+    let historial = [];
+    let audioActivo = false;
+
+    function agregarMensaje(texto, clase){
+      const div = document.createElement('div');
+      div.className = 'msg ' + clase;
+      div.textContent = texto;
+      ventana.appendChild(div);
+      ventana.scrollTop = ventana.scrollHeight;
+      return div;
+    }
+
+    function hablar(texto){
+      if(!audioActivo || !('speechSynthesis' in window)) return;
+      speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(texto);
+      utter.lang = 'es-ES';
+      speechSynthesis.speak(utter);
+    }
+
+    btnAudio.addEventListener('click', () => {
+      audioActivo = !audioActivo;
+      btnAudio.classList.toggle('activo', audioActivo);
+      btnAudio.textContent = audioActivo ? '🔊' : '🔈';
+      btnAudio.title = audioActivo ? 'Desactivar lectura en voz alta' : 'Leer respuestas en voz alta';
+      if(!audioActivo && 'speechSynthesis' in window) speechSynthesis.cancel();
+    });
+
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(SpeechRecognitionAPI){
+      const reconocimiento = new SpeechRecognitionAPI();
+      reconocimiento.lang = 'es-ES';
+      reconocimiento.interimResults = false;
+      reconocimiento.addEventListener('result', (e) => {
+        input.value = e.results[0][0].transcript;
+      });
+      reconocimiento.addEventListener('end', () => btnMic.classList.remove('activo'));
+      reconocimiento.addEventListener('error', () => btnMic.classList.remove('activo'));
+      btnMic.addEventListener('click', () => {
+        btnMic.classList.add('activo');
+        reconocimiento.start();
+      });
+    } else {
+      btnMic.style.display = 'none';
+    }
+
+    async function enviar(){
+      const texto = input.value.trim();
+      if(!texto) return;
+      agregarMensaje(texto, 'usuario');
+      input.value = '';
+
+      if(contieneRiesgo(texto)){
+        agregarMensaje(MENSAJE_RIESGO, 'alerta-riesgo');
+        hablar(MENSAJE_RIESGO);
+        historial.push({ role: 'user', content: texto });
+        historial.push({ role: 'assistant', content: MENSAJE_RIESGO });
+        if(usuarioActual) guardarAlertaRiesgo(usuarioActual, gradoActual, texto);
+        return;
+      }
+
+      historial.push({ role: 'user', content: texto });
+      const cargando = agregarMensaje('Escribiendo...', 'ia cargando');
+
+      try {
+        const respuesta = await pedirRespuestaIA(config.systemPrompt, historial);
+        cargando.remove();
+        const textoFinal = respuesta || 'No obtuve respuesta de la IA en este momento. Intenta escribir tu mensaje de nuevo.';
+        agregarMensaje(textoFinal, 'ia');
+        hablar(textoFinal);
+        historial.push({ role: 'assistant', content: textoFinal });
+      } catch(err){
+        console.error('CONFÍA · fallo al llamar a la IA:', err);
+        cargando.remove();
+        const mensajeError = 'No se pudo conectar con la inteligencia artificial en este momento. Detalle técnico: ' + err.message;
+        agregarMensaje(mensajeError, 'ia error');
+      }
+    }
+
+    btnEnviar.addEventListener('click', enviar);
+    input.addEventListener('keydown', (e) => { if(e.key === 'Enter') enviar(); });
+
+    agregarMensaje(config.saludo, 'ia');
+  }
+
+  crearChat({
+    idVentana: 'ventana-chat-psicologia',
+    idInput: 'entrada-chat-psicologia',
+    idEnviar: 'btn-enviar-chat-psicologia',
+    idMic: 'btn-mic-psicologia',
+    idAudio: 'btn-audio-psicologia',
+    saludo: 'Hola, qué bueno que estás aquí 🌱 Soy tu IA de Psicología de CONFÍA. Este es tu espacio, sin apuros ni juicios. ¿Cómo has estado?',
+    systemPrompt: 'Eres la "IA de Psicología" dentro de CONFIA, una app de apoyo emocional para estudiantes de colegio (primaria y secundaria) en Perú, en español. Tu tono es humano, cálido y cercano, como alguien de confianza que sabe escuchar de verdad, no como un formulario de preguntas. En cada respuesta, primero analiza en silencio lo que el estudiante te ha contado en toda la conversación (qué emoción siente, qué la está causando, qué ha intentado ya) y luego construye tu respuesta a partir de ese análisis, no de una fórmula genérica. Nunca respondas solo con una pregunta tipo "cuéntame más" sin haber aportado algo antes: en cada mensaje debes (1) nombrar y validar lo que sientes que está sintiendo, con tus propias palabras, (2) ofrecer una explicación breve de por qué puede sentirse así o qué puede estar pasando, (3) darle 1 o 2 sugerencias concretas y accionables de qué puede hacer ahora o en el corto plazo para sentirse mejor o resolver la situación (una técnica para calmarse, cómo abordar una conversación difícil, un primer paso posible), y (4) transmitirle calma, dejándole claro que lo que siente tiene solución y que no está solo/a. Solo agrega una pregunta de seguimiento si de verdad ayuda a entender mejor la situación, no en todos los mensajes. Varía tu forma de responder de un mensaje a otro, y evita abrir siempre con la misma frase o estructura (por ejemplo, no empieces todos los mensajes con "Entiendo que..." o "Lo que sientes es..."). Responde en 6 a 10 oraciones como máximo: sé cálido y completo en lo que aportas, pero sin relleno ni repetir lo que el estudiante ya dijo con otras palabras. Sigues sin ser un profesional de salud mental: nunca das diagnósticos clínicos ni indicaciones médicas o de medicación. Si el estudiante menciona bullying, violencia, abuso, o cualquier situación de riesgo o daño a sí mismo o a otros, dale un consejo claro de qué hacer y anímalo con calma a contárselo también a un adulto de confianza, un docente, un familiar, o a usar la sección de "Denuncia Anónima" de la app, además de seguir hablando contigo. Nunca minimices lo que la persona siente ni le des instrucciones para lastimarse.'
+  });
+
+  /* ---------- MODO DÍA / NOCHE (Sincronizado) ---------- */
+  (function(){
+    const html = document.documentElement;
+    const botones = document.querySelectorAll('.btn-tema-toggle');
+
+    function pintarBotones(tema){
+      botones.forEach(btn => {
+        const icono = btn.querySelector('.icono-tema');
+        const texto = btn.querySelector('.texto-tema');
+        if(icono && texto){
+          if(tema === 'noche'){
+            icono.textContent = '🌙';
+            texto.textContent = 'Modo noche';
+          } else {
+            icono.textContent = '☀️';
+            texto.textContent = 'Modo día';
+          }
+        }
+      });
+    }
+
+    // Aplica estado inicial
+    pintarBotones(html.getAttribute('data-tema') || 'dia');
+
+    botones.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const actual = html.getAttribute('data-tema') === 'noche' ? 'noche' : 'dia';
+        const nuevo = actual === 'noche' ? 'dia' : 'noche';
+        html.setAttribute('data-tema', nuevo);
+        pintarBotones(nuevo);
+        try{ localStorage.setItem('confia-tema', nuevo); }catch(e){}
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
